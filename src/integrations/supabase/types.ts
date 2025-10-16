@@ -14,16 +14,206 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      farms: {
+        Row: {
+          bird_capacity: number | null
+          created_at: string
+          description: string | null
+          farm_type: string
+          id: string
+          is_active: boolean | null
+          location_district: string
+          location_parish: string | null
+          location_subcounty: string | null
+          location_village: string | null
+          name: string
+          owner_id: string
+          size_acres: number | null
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          bird_capacity?: number | null
+          created_at?: string
+          description?: string | null
+          farm_type: string
+          id?: string
+          is_active?: boolean | null
+          location_district: string
+          location_parish?: string | null
+          location_subcounty?: string | null
+          location_village?: string | null
+          name: string
+          owner_id: string
+          size_acres?: number | null
+          start_date: string
+          updated_at?: string
+        }
+        Update: {
+          bird_capacity?: number | null
+          created_at?: string
+          description?: string | null
+          farm_type?: string
+          id?: string
+          is_active?: boolean | null
+          location_district?: string
+          location_parish?: string | null
+          location_subcounty?: string | null
+          location_village?: string | null
+          name?: string
+          owner_id?: string
+          size_acres?: number | null
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          contact_address: string | null
+          created_at: string
+          date_of_birth: string | null
+          email: string | null
+          full_name: string
+          gender: string | null
+          id: string
+          nin: string | null
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          contact_address?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          email?: string | null
+          full_name: string
+          gender?: string | null
+          id: string
+          nin?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          contact_address?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          email?: string | null
+          full_name?: string
+          gender?: string | null
+          id?: string
+          nin?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      workers: {
+        Row: {
+          age: number
+          auto_generated_password: string | null
+          auto_generated_username: string | null
+          contact_phone: string | null
+          created_at: string
+          farm_id: string
+          full_name: string
+          gender: string
+          id: string
+          is_active: boolean | null
+          manager_id: string | null
+          next_of_kin_name: string
+          next_of_kin_phone: string
+          next_of_kin_relationship: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          age: number
+          auto_generated_password?: string | null
+          auto_generated_username?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          farm_id: string
+          full_name: string
+          gender: string
+          id?: string
+          is_active?: boolean | null
+          manager_id?: string | null
+          next_of_kin_name: string
+          next_of_kin_phone: string
+          next_of_kin_relationship: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          age?: number
+          auto_generated_password?: string | null
+          auto_generated_username?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          farm_id?: string
+          full_name?: string
+          gender?: string
+          id?: string
+          is_active?: boolean | null
+          manager_id?: string | null
+          next_of_kin_name?: string
+          next_of_kin_phone?: string
+          next_of_kin_relationship?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workers_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "farms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role:
+        | "owner"
+        | "caretaker"
+        | "manager"
+        | "assistant_manager"
+        | "accountant"
+        | "worker"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +340,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: [
+        "owner",
+        "caretaker",
+        "manager",
+        "assistant_manager",
+        "accountant",
+        "worker",
+      ],
+    },
   },
 } as const
