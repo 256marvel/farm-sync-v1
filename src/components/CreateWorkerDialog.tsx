@@ -14,12 +14,23 @@ import { Card, CardContent } from "@/components/ui/card";
 
 const formSchema = z.object({
   full_name: z.string().min(2, "Name must be at least 2 characters"),
+  role: z.enum(["caretaker", "manager", "assistant_manager", "accountant", "worker"]),
   gender: z.enum(["male", "female", "other"]),
   age: z.string().min(1, "Age is required"),
   contact_phone: z.string().optional(),
+  nin: z.string().optional(),
   next_of_kin_name: z.string().min(2, "Next of kin name is required"),
-  next_of_kin_relationship: z.string().min(2, "Relationship is required"),
+  next_of_kin_relationship: z.enum(["parent", "sibling", "spouse", "child", "relative", "friend"]),
   next_of_kin_phone: z.string().min(10, "Valid phone number is required"),
+}).refine((data) => {
+  const rolesRequiringNIN = ["caretaker", "manager", "assistant_manager", "accountant"];
+  if (rolesRequiringNIN.includes(data.role) && !data.nin) {
+    return false;
+  }
+  return true;
+}, {
+  message: "NIN is required for Caretaker, Manager, Assistant Manager, and Accountant roles",
+  path: ["nin"],
 });
 
 interface CreateWorkerDialogProps {
@@ -39,18 +50,51 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
     resolver: zodResolver(formSchema),
     defaultValues: {
       full_name: "",
+      role: "worker",
       gender: "male",
       age: "",
       contact_phone: "",
+      nin: "",
       next_of_kin_name: "",
-      next_of_kin_relationship: "",
+      next_of_kin_relationship: "parent",
       next_of_kin_phone: "",
     },
   });
 
-  const generateCredentials = () => {
-    const username = `worker_${Math.random().toString(36).substring(2, 8)}`;
-    const password = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
+  const generateCredentials = async (fullName: string, farmName: string) => {
+    // Get first name from full name
+    const firstName = fullName.toLowerCase().split(' ')[0];
+    
+    // Get farm abbreviation (first 3 letters or full name if shorter)
+    const farmAbbr = farmName.toLowerCase().replace(/[^a-z]/g, '').substring(0, 3);
+    
+    // Find next available ID number for this farm
+    const { data: existingWorkers } = await supabase
+      .from("workers")
+      .select("auto_generated_username")
+      .eq("farm_id", farmId)
+      .like("auto_generated_username", `${firstName}_${farmAbbr}%`);
+    
+    // Extract numbers from existing usernames and find next available
+    const existingNumbers = (existingWorkers || [])
+      .map(w => {
+        const match = w.auto_generated_username.match(/\d+$/);
+        return match ? parseInt(match[0]) : 0;
+      })
+      .filter(n => n > 0);
+    
+    // Find the smallest available number starting from 1
+    let idNumber = 1;
+    while (existingNumbers.includes(idNumber)) {
+      idNumber++;
+    }
+    
+    const username = `${firstName}_${farmAbbr}${String(idNumber).padStart(3, '0')}`;
+    
+    // Generate password from first name + random numbers
+    const randomNum = Math.floor(100000 + Math.random() * 900000);
+    const password = `${firstName}${randomNum}`;
+    
     return { username, password };
   };
 
@@ -66,15 +110,26 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      const creds = generateCredentials();
+      // Get farm name for credential generation
+      const { data: farm } = await supabase
+        .from("farms")
+        .select("name")
+        .eq("id", farmId)
+        .single();
+
+      if (!farm) throw new Error("Farm not found");
+
+      const creds = await generateCredentials(values.full_name, farm.name);
 
       const { error } = await supabase.from("workers").insert({
         farm_id: farmId,
         manager_id: user.id,
         full_name: values.full_name,
+        role: values.role,
         gender: values.gender,
         age: parseInt(values.age),
         contact_phone: values.contact_phone || null,
+        nin: values.nin || null,
         next_of_kin_name: values.next_of_kin_name,
         next_of_kin_relationship: values.next_of_kin_relationship,
         next_of_kin_phone: values.next_of_kin_phone,
@@ -193,6 +248,31 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
               )}
             />
 
+            <FormField
+              control={form.control}
+              name="role"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Role/Title *</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select role" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="worker">Worker</SelectItem>
+                      <SelectItem value="caretaker">Caretaker</SelectItem>
+                      <SelectItem value="manager">Manager</SelectItem>
+                      <SelectItem value="assistant_manager">Assistant Manager</SelectItem>
+                      <SelectItem value="accountant">Accountant</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -246,6 +326,22 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
               )}
             />
 
+            <FormField
+              control={form.control}
+              name="nin"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    National ID (NIN) {["caretaker", "manager", "assistant_manager", "accountant"].includes(form.watch("role")) && "*"}
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter NIN" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <div className="border-t pt-6">
               <h3 className="text-lg font-semibold mb-4">Next of Kin Information</h3>
               
@@ -270,9 +366,21 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Relationship *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., Sister, Brother, Parent" {...field} />
-                      </FormControl>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select relationship" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="parent">Parent</SelectItem>
+                          <SelectItem value="sibling">Sibling</SelectItem>
+                          <SelectItem value="spouse">Spouse</SelectItem>
+                          <SelectItem value="child">Child</SelectItem>
+                          <SelectItem value="relative">Relative</SelectItem>
+                          <SelectItem value="friend">Friend</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}

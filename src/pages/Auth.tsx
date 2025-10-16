@@ -59,19 +59,56 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      // Check if input looks like a worker username (contains underscore)
+      const isWorkerLogin = email.includes('_');
+      
+      if (isWorkerLogin) {
+        // Worker login - check credentials against workers table
+        const { data: worker, error: fetchError } = await supabase
+          .from('workers')
+          .select('*')
+          .eq('auto_generated_username', email)
+          .eq('auto_generated_password', password)
+          .eq('is_active', true)
+          .maybeSingle();
 
-      if (error) throw error;
+        if (fetchError) throw fetchError;
+        
+        if (!worker) {
+          throw new Error("Invalid username or password");
+        }
+        
+        // Store worker session in localStorage
+        localStorage.setItem('worker_session', JSON.stringify({
+          id: worker.id,
+          username: worker.auto_generated_username,
+          full_name: worker.full_name,
+          role: worker.role,
+          farm_id: worker.farm_id
+        }));
+        
+        toast({
+          title: "Welcome back!",
+          description: `Signed in as ${worker.full_name}`,
+        });
+        
+        setTimeout(() => navigate('/dashboard'), 1000);
+      } else {
+        // Owner/Manager login via Supabase auth
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
 
-      toast({
-        title: "Welcome back!",
-        description: "Redirecting to your dashboard...",
-      });
+        if (error) throw error;
 
-      setTimeout(() => navigate("/dashboard"), 1000);
+        toast({
+          title: "Welcome back!",
+          description: "Redirecting to your dashboard...",
+        });
+
+        setTimeout(() => navigate("/dashboard"), 1000);
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -116,11 +153,11 @@ const Auth = () => {
               <TabsContent value="signin">
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signin-email">Email</Label>
+                    <Label htmlFor="signin-email">Email or Username</Label>
                     <Input
                       id="signin-email"
-                      type="email"
-                      placeholder="you@example.com"
+                      type="text"
+                      placeholder="you@example.com or worker_username"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required

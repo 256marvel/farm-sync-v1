@@ -144,6 +144,8 @@ export type Database = {
           next_of_kin_name: string
           next_of_kin_phone: string
           next_of_kin_relationship: string
+          nin: string | null
+          role: Database["public"]["Enums"]["worker_role"]
           updated_at: string
           user_id: string | null
         }
@@ -162,6 +164,8 @@ export type Database = {
           next_of_kin_name: string
           next_of_kin_phone: string
           next_of_kin_relationship: string
+          nin?: string | null
+          role?: Database["public"]["Enums"]["worker_role"]
           updated_at?: string
           user_id?: string | null
         }
@@ -180,6 +184,8 @@ export type Database = {
           next_of_kin_name?: string
           next_of_kin_phone?: string
           next_of_kin_relationship?: string
+          nin?: string | null
+          role?: Database["public"]["Enums"]["worker_role"]
           updated_at?: string
           user_id?: string | null
         }
@@ -209,6 +215,12 @@ export type Database = {
     Enums: {
       app_role:
         | "owner"
+        | "caretaker"
+        | "manager"
+        | "assistant_manager"
+        | "accountant"
+        | "worker"
+      worker_role:
         | "caretaker"
         | "manager"
         | "assistant_manager"
@@ -343,6 +355,13 @@ export const Constants = {
     Enums: {
       app_role: [
         "owner",
+        "caretaker",
+        "manager",
+        "assistant_manager",
+        "accountant",
+        "worker",
+      ],
+      worker_role: [
         "caretaker",
         "manager",
         "assistant_manager",

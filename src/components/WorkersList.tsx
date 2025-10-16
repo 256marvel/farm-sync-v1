@@ -43,6 +43,7 @@ const WorkersList = ({ workers, loading }: WorkersListProps) => {
         <TableHeader>
           <TableRow>
             <TableHead>Name</TableHead>
+            <TableHead>Role</TableHead>
             <TableHead>Gender</TableHead>
             <TableHead>Age</TableHead>
             <TableHead>Contact</TableHead>
@@ -65,6 +66,11 @@ const WorkersList = ({ workers, loading }: WorkersListProps) => {
                     </p>
                   </div>
                 </div>
+              </TableCell>
+              <TableCell>
+                <Badge variant="outline" className="capitalize">
+                  {worker.role?.replace('_', ' ')}
+                </Badge>
               </TableCell>
               <TableCell className="capitalize">{worker.gender}</TableCell>
               <TableCell>{worker.age} years</TableCell>
