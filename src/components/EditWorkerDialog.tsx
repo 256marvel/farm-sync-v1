@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -9,8 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Copy, Check } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
+import type { Database } from "@/integrations/supabase/types";
+
+type Worker = Database["public"]["Tables"]["workers"]["Row"];
 
 const formSchema = z.object({
   full_name: z.string().min(2, "Name must be at least 2 characters"),
@@ -22,6 +24,7 @@ const formSchema = z.object({
   next_of_kin_name: z.string().min(2, "Next of kin name is required"),
   next_of_kin_relationship: z.enum(["parent", "sibling", "spouse", "child", "relative", "friend"]),
   next_of_kin_phone: z.string().min(10, "Valid phone number is required"),
+  is_active: z.boolean(),
 }).refine((data) => {
   const rolesRequiringNIN = ["caretaker", "manager", "assistant_manager", "accountant"];
   if (rolesRequiringNIN.includes(data.role) && !data.nin) {
@@ -33,17 +36,15 @@ const formSchema = z.object({
   path: ["nin"],
 });
 
-interface CreateWorkerDialogProps {
+interface EditWorkerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  farmId: string;
+  worker: Worker | null;
   onSuccess: () => void;
 }
 
-const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWorkerDialogProps) => {
+const EditWorkerDialog = ({ open, onOpenChange, worker, onSuccess }: EditWorkerDialogProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [credentials, setCredentials] = useState<{ username: string; password: string } | null>(null);
-  const [copiedField, setCopiedField] = useState<string | null>(null);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -58,117 +59,60 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
       next_of_kin_name: "",
       next_of_kin_relationship: "parent",
       next_of_kin_phone: "",
+      is_active: true,
     },
   });
 
-  const generateCredentials = async (fullName: string, farmName: string) => {
-    // Get first name from full name
-    const firstName = fullName.toLowerCase().split(' ')[0];
-    
-    // Get farm abbreviation (first 3 letters or full name if shorter)
-    const farmAbbr = farmName.toLowerCase().replace(/[^a-z]/g, '').substring(0, 3);
-    
-    // Find next available ID number for this farm
-    const { data: existingWorkers } = await supabase
-      .from("workers")
-      .select("auto_generated_username")
-      .eq("farm_id", farmId)
-      .like("auto_generated_username", `${firstName}_${farmAbbr}%`);
-    
-    // Extract numbers from existing usernames and find next available
-    const existingNumbers = (existingWorkers || [])
-      .map(w => {
-        const match = w.auto_generated_username.match(/\d+$/);
-        return match ? parseInt(match[0]) : 0;
-      })
-      .filter(n => n > 0);
-    
-    // Find the smallest available number starting from 1
-    let idNumber = 1;
-    while (existingNumbers.includes(idNumber)) {
-      idNumber++;
+  useEffect(() => {
+    if (worker) {
+      form.reset({
+        full_name: worker.full_name,
+        role: worker.role,
+        gender: worker.gender as "male" | "female" | "other",
+        age: worker.age.toString(),
+        contact_phone: worker.contact_phone || "",
+        nin: worker.nin || "",
+        next_of_kin_name: worker.next_of_kin_name,
+        next_of_kin_relationship: worker.next_of_kin_relationship as any,
+        next_of_kin_phone: worker.next_of_kin_phone,
+        is_active: worker.is_active ?? true,
+      });
     }
-    
-    const username = `${firstName}_${farmAbbr}${String(idNumber).padStart(3, '0')}`;
-    
-    // Generate password from first name + random numbers
-    const randomNum = Math.floor(100000 + Math.random() * 900000);
-    const password = `${firstName}${randomNum}`;
-    
-    return { username, password };
-  };
-
-  const copyToClipboard = async (text: string, field: string) => {
-    await navigator.clipboard.writeText(text);
-    setCopiedField(field);
-    setTimeout(() => setCopiedField(null), 2000);
-  };
+  }, [worker, form]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!worker) return;
+    
     setIsSubmitting(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      // Get farm name for credential generation
-      const { data: farm } = await supabase
-        .from("farms")
-        .select("name")
-        .eq("id", farmId)
-        .single();
-
-      if (!farm) throw new Error("Farm not found");
-
-      const creds = await generateCredentials(values.full_name, farm.name);
-
-      // Create Supabase auth user for the worker
-      const workerEmail = `${creds.username}@farmsync.local`;
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: workerEmail,
-        password: creds.password,
-        options: {
-          data: {
-            full_name: values.full_name,
-            username: creds.username,
-            is_worker: true,
-          }
-        }
-      });
-
-      if (authError) throw authError;
-      if (!authData.user) throw new Error("Failed to create worker account");
-
-      // Create worker record linked to auth user
-      const { error } = await supabase.from("workers").insert({
-        farm_id: farmId,
-        manager_id: user.id,
-        user_id: authData.user.id,
-        full_name: values.full_name,
-        role: values.role,
-        gender: values.gender,
-        age: parseInt(values.age),
-        contact_phone: values.contact_phone || null,
-        nin: values.nin || null,
-        next_of_kin_name: values.next_of_kin_name,
-        next_of_kin_relationship: values.next_of_kin_relationship,
-        next_of_kin_phone: values.next_of_kin_phone,
-        auto_generated_username: creds.username,
-        auto_generated_password: creds.password,
-      });
+      const { error } = await supabase
+        .from("workers")
+        .update({
+          full_name: values.full_name,
+          role: values.role,
+          gender: values.gender,
+          age: parseInt(values.age),
+          contact_phone: values.contact_phone || null,
+          nin: values.nin || null,
+          next_of_kin_name: values.next_of_kin_name,
+          next_of_kin_relationship: values.next_of_kin_relationship,
+          next_of_kin_phone: values.next_of_kin_phone,
+          is_active: values.is_active,
+        })
+        .eq("id", worker.id);
 
       if (error) throw error;
 
-      setCredentials(creds);
-      
       toast({
-        title: "Worker added successfully! 🎉",
-        description: "Login credentials have been generated",
+        title: "Worker updated successfully! ✅",
+        description: "Changes have been saved",
       });
 
       onSuccess();
+      onOpenChange(false);
     } catch (error: any) {
       toast({
-        title: "Error adding worker",
+        title: "Error updating worker",
         description: error.message,
         variant: "destructive",
       });
@@ -177,77 +121,13 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
     }
   };
 
-  const handleClose = () => {
-    form.reset();
-    setCredentials(null);
-    onOpenChange(false);
-  };
-
-  if (credentials) {
-    return (
-      <Dialog open={open} onOpenChange={handleClose}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-2xl">Worker Credentials Generated ✅</DialogTitle>
-            <DialogDescription>
-              Save these credentials - they won't be shown again!
-            </DialogDescription>
-          </DialogHeader>
-
-          <Card className="border-primary/20 bg-primary/5">
-            <CardContent className="p-6 space-y-4">
-              <div>
-                <label className="text-sm font-semibold text-muted-foreground">Username</label>
-                <div className="flex items-center gap-2 mt-1">
-                  <code className="flex-1 px-3 py-2 bg-background rounded-lg border text-sm font-mono">
-                    {credentials.username}
-                  </code>
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    onClick={() => copyToClipboard(credentials.username, "username")}
-                  >
-                    {copiedField === "username" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                  </Button>
-                </div>
-              </div>
-
-              <div>
-                <label className="text-sm font-semibold text-muted-foreground">Password</label>
-                <div className="flex items-center gap-2 mt-1">
-                  <code className="flex-1 px-3 py-2 bg-background rounded-lg border text-sm font-mono">
-                    {credentials.password}
-                  </code>
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    onClick={() => copyToClipboard(credentials.password, "password")}
-                  >
-                    {copiedField === "password" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Button
-            onClick={handleClose}
-            className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-white"
-          >
-            Done
-          </Button>
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Add New Worker</DialogTitle>
+          <DialogTitle className="text-2xl">Edit Worker</DialogTitle>
           <DialogDescription>
-            Login credentials will be auto-generated after creation
+            Update worker information and status
           </DialogDescription>
         </DialogHeader>
 
@@ -273,7 +153,7 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Role/Title *</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select role" />
@@ -299,7 +179,7 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Gender *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select gender" />
@@ -361,6 +241,28 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
               )}
             />
 
+            <FormField
+              control={form.control}
+              name="is_active"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Status *</FormLabel>
+                  <Select onValueChange={(value) => field.onChange(value === "true")} value={field.value.toString()}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="true">Active</SelectItem>
+                      <SelectItem value="false">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <div className="border-t pt-6">
               <h3 className="text-lg font-semibold mb-4">Next of Kin Information</h3>
               
@@ -385,7 +287,7 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Relationship *</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select relationship" />
@@ -425,7 +327,7 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
               <Button
                 type="button"
                 variant="outline"
-                onClick={handleClose}
+                onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
               >
                 Cancel
@@ -436,7 +338,7 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
                 className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-white"
               >
                 {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                Add Worker
+                Save Changes
               </Button>
             </div>
           </form>
@@ -446,4 +348,4 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
   );
 };
 
-export default CreateWorkerDialog;
+export default EditWorkerDialog;

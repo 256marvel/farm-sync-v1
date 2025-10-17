@@ -9,6 +9,7 @@ import type { Database } from "@/integrations/supabase/types";
 import FarmSelector from "@/components/FarmSelector";
 import CreateFarmDialog from "@/components/CreateFarmDialog";
 import FarmView from "@/components/FarmView";
+import SettingsDialog from "@/components/SettingsDialog";
 
 type Farm = Database["public"]["Tables"]["farms"]["Row"];
 
@@ -19,6 +20,7 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedFarm, setSelectedFarm] = useState<Farm | null>(null);
   const [createFarmOpen, setCreateFarmOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -103,7 +105,7 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" onClick={() => setSettingsOpen(true)}>
                 <Settings className="w-5 h-5" />
               </Button>
               <Button variant="ghost" size="icon" onClick={handleSignOut}>
@@ -139,6 +141,12 @@ const Dashboard = () => {
         open={createFarmOpen}
         onOpenChange={setCreateFarmOpen}
         onSuccess={handleFarmCreated}
+      />
+
+      <SettingsDialog
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+        user={user}
       />
     </div>
   );

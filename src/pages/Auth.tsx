@@ -63,33 +63,32 @@ const Auth = () => {
       const isWorkerLogin = email.includes('_');
       
       if (isWorkerLogin) {
-        // Worker login - check credentials against workers table
+        // Worker login - find worker and use their auth email
         const { data: worker, error: fetchError } = await supabase
           .from('workers')
-          .select('*')
+          .select('auto_generated_username, auto_generated_password')
           .eq('auto_generated_username', email)
-          .eq('auto_generated_password', password)
           .eq('is_active', true)
           .maybeSingle();
 
         if (fetchError) throw fetchError;
         
-        if (!worker) {
+        if (!worker || worker.auto_generated_password !== password) {
           throw new Error("Invalid username or password");
         }
         
-        // Store worker session in localStorage
-        localStorage.setItem('worker_session', JSON.stringify({
-          id: worker.id,
-          username: worker.auto_generated_username,
-          full_name: worker.full_name,
-          role: worker.role,
-          farm_id: worker.farm_id
-        }));
+        // Login using worker's Supabase auth account
+        const workerEmail = `${email}@farmsync.local`;
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: workerEmail,
+          password: password,
+        });
+
+        if (signInError) throw signInError;
         
         toast({
           title: "Welcome back!",
-          description: `Signed in as ${worker.full_name}`,
+          description: "Signed in successfully",
         });
         
         setTimeout(() => navigate('/dashboard'), 1000);
@@ -112,7 +111,7 @@ const Auth = () => {
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Invalid credentials",
         variant: "destructive",
       });
     } finally {
