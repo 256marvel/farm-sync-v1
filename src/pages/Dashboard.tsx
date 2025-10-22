@@ -10,6 +10,7 @@ import FarmSelector from "@/components/FarmSelector";
 import CreateFarmDialog from "@/components/CreateFarmDialog";
 import FarmView from "@/components/FarmView";
 import SettingsDialog from "@/components/SettingsDialog";
+import WorkerDashboard from "@/components/WorkerDashboard";
 
 type Farm = Database["public"]["Tables"]["farms"]["Row"];
 
@@ -22,12 +23,25 @@ const Dashboard = () => {
   const [createFarmOpen, setCreateFarmOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [isWorker, setIsWorker] = useState(false);
 
   useEffect(() => {
+    const checkUserRole = async (userId: string) => {
+      // Check if user is a worker
+      const { data: workerData } = await supabase
+        .from("workers")
+        .select("id")
+        .eq("user_id", userId)
+        .maybeSingle();
+      
+      setIsWorker(!!workerData);
+    };
+
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user);
+        checkUserRole(session.user.id);
       } else {
         navigate("/auth");
       }
@@ -40,6 +54,7 @@ const Dashboard = () => {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         setUser(session.user);
+        checkUserRole(session.user.id);
       } else {
         navigate("/auth");
       }
@@ -117,7 +132,9 @@ const Dashboard = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        {selectedFarm ? (
+        {isWorker ? (
+          <WorkerDashboard userId={user!.id} />
+        ) : selectedFarm ? (
           <FarmView farm={selectedFarm} onBack={handleBackToFarms} />
         ) : (
           <>
