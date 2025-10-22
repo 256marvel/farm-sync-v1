@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      egg_production: {
+        Row: {
+          created_at: string
+          damaged_eggs: number
+          damaged_trays: number
+          date: string
+          eggs_per_tray: number
+          farm_id: string
+          id: string
+          trays_collected: number
+          updated_at: string
+          worker_id: string
+        }
+        Insert: {
+          created_at?: string
+          damaged_eggs?: number
+          damaged_trays?: number
+          date: string
+          eggs_per_tray: number
+          farm_id: string
+          id?: string
+          trays_collected: number
+          updated_at?: string
+          worker_id: string
+        }
+        Update: {
+          created_at?: string
+          damaged_eggs?: number
+          damaged_trays?: number
+          date?: string
+          eggs_per_tray?: number
+          farm_id?: string
+          id?: string
+          trays_collected?: number
+          updated_at?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "egg_production_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "farms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "egg_production_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       farms: {
         Row: {
           bird_capacity: number | null
@@ -67,6 +121,108 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      feed_usage: {
+        Row: {
+          created_at: string
+          date: string
+          farm_id: string
+          feed_type: string
+          id: string
+          quantity_used_kg: number
+          remaining_stock_kg: number
+          updated_at: string
+          worker_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          farm_id: string
+          feed_type: string
+          id?: string
+          quantity_used_kg: number
+          remaining_stock_kg: number
+          updated_at?: string
+          worker_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          farm_id?: string
+          feed_type?: string
+          id?: string
+          quantity_used_kg?: number
+          remaining_stock_kg?: number
+          updated_at?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feed_usage_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "farms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_usage_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mortality: {
+        Row: {
+          age_weeks: number
+          created_at: string
+          date: string
+          farm_id: string
+          id: string
+          number_dead: number
+          suspected_cause: string
+          updated_at: string
+          worker_id: string
+        }
+        Insert: {
+          age_weeks: number
+          created_at?: string
+          date: string
+          farm_id: string
+          id?: string
+          number_dead: number
+          suspected_cause: string
+          updated_at?: string
+          worker_id: string
+        }
+        Update: {
+          age_weeks?: number
+          created_at?: string
+          date?: string
+          farm_id?: string
+          id?: string
+          number_dead?: number
+          suspected_cause?: string
+          updated_at?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mortality_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "farms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mortality_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -127,6 +283,102 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      vaccination: {
+        Row: {
+          administered_by: string
+          birds_vaccinated: number
+          created_at: string
+          date: string
+          farm_id: string
+          id: string
+          updated_at: string
+          vaccine_name: string
+          worker_id: string
+        }
+        Insert: {
+          administered_by: string
+          birds_vaccinated: number
+          created_at?: string
+          date: string
+          farm_id: string
+          id?: string
+          updated_at?: string
+          vaccine_name: string
+          worker_id: string
+        }
+        Update: {
+          administered_by?: string
+          birds_vaccinated?: number
+          created_at?: string
+          date?: string
+          farm_id?: string
+          id?: string
+          updated_at?: string
+          vaccine_name?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vaccination_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "farms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaccination_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      worker_notes: {
+        Row: {
+          created_at: string
+          date: string
+          farm_id: string
+          id: string
+          notes: string
+          updated_at: string
+          worker_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          farm_id: string
+          id?: string
+          notes: string
+          updated_at?: string
+          worker_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          farm_id?: string
+          id?: string
+          notes?: string
+          updated_at?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_notes_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "farms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_notes_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       workers: {
         Row: {

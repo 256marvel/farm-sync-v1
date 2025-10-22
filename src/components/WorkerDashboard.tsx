@@ -2,9 +2,15 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Users, MapPin, Calendar, Phone, User, Briefcase } from "lucide-react";
+import { Loader2, Users, MapPin, Calendar, Phone, User, Briefcase, Egg, Package, AlertTriangle, Syringe, FileText, Plus } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
+import { EggProductionDialog } from "./worker/EggProductionDialog";
+import { FeedUsageDialog } from "./worker/FeedUsageDialog";
+import { MortalityDialog } from "./worker/MortalityDialog";
+import { VaccinationDialog } from "./worker/VaccinationDialog";
+import { NotesDialog } from "./worker/NotesDialog";
 
 type Worker = Database["public"]["Tables"]["workers"]["Row"];
 type Farm = Database["public"]["Tables"]["farms"]["Row"];
@@ -19,6 +25,12 @@ const WorkerDashboard = ({ userId }: WorkerDashboardProps) => {
   const [farm, setFarm] = useState<Farm | null>(null);
   const [coworkers, setCoworkers] = useState<Worker[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [eggDialogOpen, setEggDialogOpen] = useState(false);
+  const [feedDialogOpen, setFeedDialogOpen] = useState(false);
+  const [mortalityDialogOpen, setMortalityDialogOpen] = useState(false);
+  const [vaccinationDialogOpen, setVaccinationDialogOpen] = useState(false);
+  const [notesDialogOpen, setNotesDialogOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     fetchWorkerData();
@@ -70,6 +82,14 @@ const WorkerDashboard = ({ userId }: WorkerDashboardProps) => {
     }
   };
 
+  const handleDataEntrySuccess = () => {
+    setRefreshKey(prev => prev + 1);
+    toast({
+      title: "Data recorded",
+      description: "Your entry has been saved successfully",
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -95,6 +115,58 @@ const WorkerDashboard = ({ userId }: WorkerDashboardProps) => {
         </h2>
         <p className="text-muted-foreground">Your work dashboard at {farm.name}</p>
       </div>
+
+      {/* Quick Actions - Data Entry Buttons */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Record Daily Data</CardTitle>
+          <CardDescription>Click to record your daily farm operations</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <Button
+              variant="outline"
+              className="h-20 flex-col gap-2"
+              onClick={() => setEggDialogOpen(true)}
+            >
+              <Egg className="w-6 h-6" />
+              <span className="text-sm">Egg Production</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-20 flex-col gap-2"
+              onClick={() => setFeedDialogOpen(true)}
+            >
+              <Package className="w-6 h-6" />
+              <span className="text-sm">Feed Usage</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-20 flex-col gap-2"
+              onClick={() => setMortalityDialogOpen(true)}
+            >
+              <AlertTriangle className="w-6 h-6" />
+              <span className="text-sm">Mortality</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-20 flex-col gap-2"
+              onClick={() => setVaccinationDialogOpen(true)}
+            >
+              <Syringe className="w-6 h-6" />
+              <span className="text-sm">Vaccination</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-20 flex-col gap-2"
+              onClick={() => setNotesDialogOpen(true)}
+            >
+              <FileText className="w-6 h-6" />
+              <span className="text-sm">Notes</span>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Worker Profile Card */}
       <Card>
@@ -258,6 +330,43 @@ const WorkerDashboard = ({ userId }: WorkerDashboardProps) => {
           )}
         </CardContent>
       </Card>
+
+      {/* Data Entry Dialogs */}
+      <EggProductionDialog
+        open={eggDialogOpen}
+        onOpenChange={setEggDialogOpen}
+        workerId={worker.id}
+        farmId={farm.id}
+        onSuccess={handleDataEntrySuccess}
+      />
+      <FeedUsageDialog
+        open={feedDialogOpen}
+        onOpenChange={setFeedDialogOpen}
+        workerId={worker.id}
+        farmId={farm.id}
+        onSuccess={handleDataEntrySuccess}
+      />
+      <MortalityDialog
+        open={mortalityDialogOpen}
+        onOpenChange={setMortalityDialogOpen}
+        workerId={worker.id}
+        farmId={farm.id}
+        onSuccess={handleDataEntrySuccess}
+      />
+      <VaccinationDialog
+        open={vaccinationDialogOpen}
+        onOpenChange={setVaccinationDialogOpen}
+        workerId={worker.id}
+        farmId={farm.id}
+        onSuccess={handleDataEntrySuccess}
+      />
+      <NotesDialog
+        open={notesDialogOpen}
+        onOpenChange={setNotesDialogOpen}
+        workerId={worker.id}
+        farmId={farm.id}
+        onSuccess={handleDataEntrySuccess}
+      />
     </div>
   );
 };
