@@ -111,13 +111,14 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
       if (!user) throw new Error("Not authenticated");
 
       // Get farm name for credential generation
-      const { data: farm } = await supabase
+      const { data: farm, error: farmError } = await supabase
         .from("farms")
         .select("name")
         .eq("id", farmId)
-        .single();
+        .maybeSingle();
 
-      if (!farm) throw new Error("Farm not found");
+      if (farmError) throw farmError;
+      if (!farm) throw new Error("Farm not found. Please try refreshing the page.");
 
       const creds = await generateCredentials(values.full_name, farm.name);
 
