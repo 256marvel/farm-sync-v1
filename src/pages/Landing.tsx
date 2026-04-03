@@ -9,7 +9,7 @@ const Landing = () => {
     {
       icon: Users,
       title: "Multi-Role Management",
-      description: "Owners, managers, caretakers, and workers—all in one system",
+      description: "Owners, Managers, Caretakers, and Workers. All in one system",
     },
     {
       icon: TrendingUp,
@@ -61,7 +61,7 @@ const Landing = () => {
             </h1>
 
             <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
-              The modern way to manage your poultry farm. Track production, manage teams, and grow smarter—even offline.
+              The modern way to manage your poultry farm. Track production, manage teams, and grow smarter even when offline.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
@@ -70,7 +70,7 @@ const Landing = () => {
                 onClick={() => navigate("/auth")}
                 className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-white font-semibold px-8 py-6 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
               >
-                Get Started Free
+                Get Started for Free
               </Button>
               <Button
                 size="lg"
@@ -98,7 +98,7 @@ const Landing = () => {
               <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"> Succeed</span>
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Built specifically for Ugandan poultry farmers with the features that matter most
+              Built specifically for Ugandan Poultry Farmers with the features that matter most
             </p>
           </div>
 
@@ -145,7 +145,7 @@ const Landing = () => {
       {/* Footer */}
       <footer className="py-8 border-t border-border">
         <div className="container mx-auto px-4 text-center text-muted-foreground">
-          <p>© 2025 FarmSync. Built for Ugandan poultry farmers.</p>
+          <p>© 2025 FarmSync. Built for Ugandan Poultry Farmers.</p>
         </div>
       </footer>
     </div>
