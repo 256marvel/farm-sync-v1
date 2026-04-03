@@ -399,7 +399,7 @@ export type Database = {
           nin: string | null
           role: Database["public"]["Enums"]["worker_role"]
           updated_at: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           age: number
@@ -419,7 +419,7 @@ export type Database = {
           nin?: string | null
           role?: Database["public"]["Enums"]["worker_role"]
           updated_at?: string
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           age?: number
@@ -439,7 +439,7 @@ export type Database = {
           nin?: string | null
           role?: Database["public"]["Enums"]["worker_role"]
           updated_at?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: [
           {
