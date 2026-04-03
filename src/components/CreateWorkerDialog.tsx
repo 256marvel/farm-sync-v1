@@ -107,75 +107,29 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
     try {
-      const {
-        data: { session: ownerSession },
-      } = await supabase.auth.getSession();
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (!ownerSession?.access_token || !ownerSession.refresh_token) {
-        throw new Error("Your session expired. Please sign in again.");
-      }
-
-      if (!user) throw new Error("Not authenticated");
-
-      // Get farm name for credential generation
-      const { data: farm, error: farmError } = await supabase
-        .from("farms")
-        .select("name")
-        .eq("id", farmId)
-        .maybeSingle();
-
-      if (farmError) throw farmError;
-      if (!farm) throw new Error("Farm not found. Please try refreshing the page.");
-
-      const creds = await generateCredentials(values.full_name, farm.name);
-
-      // Create Supabase auth user for the worker
-      const workerEmail = `${creds.username}@farmsync.local`;
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: workerEmail,
-        password: creds.password,
-        options: {
-          data: {
-            full_name: values.full_name,
-            username: creds.username,
-            is_worker: true,
-          }
-        }
-      });
-
-      if (authError) throw authError;
-      if (!authData.user) throw new Error("Failed to create worker account");
-
-      const { error: restoreSessionError } = await supabase.auth.setSession({
-        access_token: ownerSession.access_token,
-        refresh_token: ownerSession.refresh_token,
-      });
-
-      if (restoreSessionError) throw restoreSessionError;
-
-      // Create worker record linked to auth user
-      const { error } = await supabase.from("workers").insert({
-        farm_id: farmId,
-        manager_id: user.id,
-        user_id: authData.user.id,
-        full_name: values.full_name,
-        role: values.role,
-        gender: values.gender,
-        age: parseInt(values.age),
-        contact_phone: values.contact_phone || null,
-        nin: values.nin || null,
-        next_of_kin_name: values.next_of_kin_name,
-        next_of_kin_relationship: values.next_of_kin_relationship,
-        next_of_kin_phone: values.next_of_kin_phone,
-        auto_generated_username: creds.username,
-        auto_generated_password: creds.password,
+      const { data, error } = await supabase.functions.invoke("create-worker", {
+        body: {
+          farmId,
+          fullName: values.full_name,
+          role: values.role,
+          gender: values.gender,
+          age: parseInt(values.age),
+          contactPhone: values.contact_phone || null,
+          nin: values.nin || null,
+          nextOfKinName: values.next_of_kin_name,
+          nextOfKinRelationship: values.next_of_kin_relationship,
+          nextOfKinPhone: values.next_of_kin_phone,
+        },
       });
 
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      if (!data?.username || !data?.password) {
+        throw new Error("Failed to generate worker credentials");
+      }
 
-      setCredentials(creds);
-      
+      setCredentials({ username: data.username, password: data.password });
+
       toast({
         title: "Worker added successfully! 🎉",
         description: "Login credentials have been generated",
