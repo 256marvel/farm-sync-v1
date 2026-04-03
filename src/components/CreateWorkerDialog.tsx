@@ -107,7 +107,15 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
     try {
+      const {
+        data: { session: ownerSession },
+      } = await supabase.auth.getSession();
       const { data: { user } } = await supabase.auth.getUser();
+
+      if (!ownerSession?.access_token || !ownerSession.refresh_token) {
+        throw new Error("Your session expired. Please sign in again.");
+      }
+
       if (!user) throw new Error("Not authenticated");
 
       // Get farm name for credential generation
@@ -138,6 +146,13 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
 
       if (authError) throw authError;
       if (!authData.user) throw new Error("Failed to create worker account");
+
+      const { error: restoreSessionError } = await supabase.auth.setSession({
+        access_token: ownerSession.access_token,
+        refresh_token: ownerSession.refresh_token,
+      });
+
+      if (restoreSessionError) throw restoreSessionError;
 
       // Create worker record linked to auth user
       const { error } = await supabase.from("workers").insert({
