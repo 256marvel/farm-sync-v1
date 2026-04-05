@@ -32,7 +32,7 @@ serve(async (req) => {
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseAnonKey = Deno.env.get("SUPABASE_PUBLISHABLE_KEY");
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const authHeader = req.headers.get("Authorization");
 
@@ -99,41 +99,59 @@ serve(async (req) => {
       return json({ error: "You can only add workers to your own farm." }, 403);
     }
 
-    const firstName = fullName.toLowerCase().trim().split(/\s+/)[0]?.replace(/[^a-z]/g, "") || "worker";
-    const farmAbbr = farm.name.toLowerCase().replace(/[^a-z]/g, "").slice(0, 3) || "frm";
-    const prefix = `${firstName}_${farmAbbr}`;
-
+    // Generate email: firstname.lastname@farmsync.com (lowercased, spaces to dots)
+    const nameParts = fullName.toLowerCase().trim().split(/\s+/).map(p => p.replace(/[^a-z]/g, "")).filter(Boolean);
+    const emailBase = nameParts.join(".") || "worker";
+    
+    // Check for existing workers with similar emails to add a number suffix if needed
     const { data: existingWorkers, error: existingWorkersError } = await admin
       .from("workers")
       .select("auto_generated_username")
       .eq("farm_id", farmId)
-      .like("auto_generated_username", `${prefix}%`);
+      .like("auto_generated_username", `${emailBase}%@farmsync.com`);
 
     if (existingWorkersError) {
       return json({ error: existingWorkersError.message }, 400);
     }
 
+    // Extract numbers from existing emails
     const existingNumbers = (existingWorkers ?? [])
       .map((worker) => {
         const username = worker.auto_generated_username ?? "";
-        const match = username.match(/(\d+)$/);
+        const match = username.match(/(\d+)@farmsync\.com$/);
         return match ? Number.parseInt(match[1], 10) : 0;
-      })
-      .filter((value) => value > 0);
+      });
 
-    let idNumber = 1;
-    while (existingNumbers.includes(idNumber)) idNumber += 1;
+    // If no existing workers with this base, use no number suffix
+    // Otherwise find next available number
+    let workerEmail: string;
+    if (existingWorkers && existingWorkers.length === 0) {
+      workerEmail = `${emailBase}@farmsync.com`;
+    } else {
+      // Check if base email (without number) exists
+      const baseExists = (existingWorkers ?? []).some(
+        (w) => w.auto_generated_username === `${emailBase}@farmsync.com`
+      );
+      if (!baseExists) {
+        workerEmail = `${emailBase}@farmsync.com`;
+      } else {
+        let idNumber = 2;
+        while (existingNumbers.includes(idNumber)) idNumber += 1;
+        workerEmail = `${emailBase}${idNumber}@farmsync.com`;
+      }
+    }
 
-    const username = `${prefix}${String(idNumber).padStart(3, "0")}`;
+    // Generate password
+    const firstName = nameParts[0] || "worker";
     const password = `${firstName}${Math.floor(100000 + Math.random() * 900000)}`;
-    const workerEmail = `${username}@farmsync.local`;
 
+    // Check if auth user already exists with this email
     const { data: listedUsers, error: listUsersError } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
     if (listUsersError) {
       return json({ error: listUsersError.message }, 500);
     }
 
-    const existingAuthUser = listedUsers.users.find((listedUser) => listedUser.email?.toLowerCase() === workerEmail.toLowerCase());
+    const existingAuthUser = listedUsers.users.find((u) => u.email?.toLowerCase() === workerEmail.toLowerCase());
 
     let workerUserId = existingAuthUser?.id;
     let createdNewUser = false;
@@ -144,7 +162,7 @@ serve(async (req) => {
         user_metadata: {
           ...(existingAuthUser.user_metadata ?? {}),
           full_name: fullName,
-          username,
+          username: workerEmail,
           is_worker: true,
           role,
         },
@@ -161,7 +179,7 @@ serve(async (req) => {
         email_confirm: true,
         user_metadata: {
           full_name: fullName,
-          username,
+          username: workerEmail,
           is_worker: true,
           role,
         },
@@ -189,25 +207,27 @@ serve(async (req) => {
       return json({ error: existingWorkerRecordError.message }, 400);
     }
 
+    const workerData = {
+      farm_id: farmId,
+      manager_id: user.id,
+      full_name: fullName,
+      role,
+      gender,
+      age,
+      contact_phone: contactPhone || null,
+      nin: nin || null,
+      next_of_kin_name: nextOfKinName,
+      next_of_kin_relationship: nextOfKinRelationship,
+      next_of_kin_phone: nextOfKinPhone,
+      auto_generated_username: workerEmail,
+      auto_generated_password: password,
+      is_active: true,
+    };
+
     if (existingWorkerRecord) {
       const { error: updateWorkerError } = await admin
         .from("workers")
-        .update({
-          farm_id: farmId,
-          manager_id: user.id,
-          full_name: fullName,
-          role,
-          gender,
-          age,
-          contact_phone: contactPhone || null,
-          nin: nin || null,
-          next_of_kin_name: nextOfKinName,
-          next_of_kin_relationship: nextOfKinRelationship,
-          next_of_kin_phone: nextOfKinPhone,
-          auto_generated_username: username,
-          auto_generated_password: password,
-          is_active: true,
-        })
+        .update(workerData)
         .eq("id", existingWorkerRecord.id);
 
       if (updateWorkerError) {
@@ -215,21 +235,8 @@ serve(async (req) => {
       }
     } else {
       const { error: insertWorkerError } = await admin.from("workers").insert({
-        farm_id: farmId,
-        manager_id: user.id,
+        ...workerData,
         user_id: workerUserId,
-        full_name: fullName,
-        role,
-        gender,
-        age,
-        contact_phone: contactPhone || null,
-        nin: nin || null,
-        next_of_kin_name: nextOfKinName,
-        next_of_kin_relationship: nextOfKinRelationship,
-        next_of_kin_phone: nextOfKinPhone,
-        auto_generated_username: username,
-        auto_generated_password: password,
-        is_active: true,
       });
 
       if (insertWorkerError) {
@@ -240,7 +247,7 @@ serve(async (req) => {
       }
     }
 
-    return json({ username, password });
+    return json({ email: workerEmail, password });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unexpected error";
     return json({ error: message }, 500);

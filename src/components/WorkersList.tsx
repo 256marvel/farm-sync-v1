@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { User, Phone, Users as UsersIcon, Pencil, Trash2 } from "lucide-react";
+import { User, Phone, Users as UsersIcon, Pencil, Trash2, Eye, EyeOff, Copy, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Database } from "@/integrations/supabase/types";
@@ -21,7 +21,24 @@ interface WorkersListProps {
 const WorkersList = ({ workers, loading, onRefresh }: WorkersListProps) => {
   const [editWorker, setEditWorker] = useState<Worker | null>(null);
   const [deleteWorker, setDeleteWorker] = useState<Worker | null>(null);
+  const [visiblePasswords, setVisiblePasswords] = useState<Set<string>>(new Set());
+  const [copiedField, setCopiedField] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const togglePasswordVisibility = (workerId: string) => {
+    setVisiblePasswords(prev => {
+      const next = new Set(prev);
+      if (next.has(workerId)) next.delete(workerId);
+      else next.add(workerId);
+      return next;
+    });
+  };
+
+  const copyToClipboard = async (text: string, fieldId: string) => {
+    await navigator.clipboard.writeText(text);
+    setCopiedField(fieldId);
+    setTimeout(() => setCopiedField(null), 2000);
+  };
 
   const handleDelete = async () => {
     if (!deleteWorker) return;
@@ -89,6 +106,8 @@ const WorkersList = ({ workers, loading, onRefresh }: WorkersListProps) => {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Role</TableHead>
+              <TableHead>Login Email</TableHead>
+              <TableHead>Password</TableHead>
               <TableHead>Gender</TableHead>
               <TableHead>Age</TableHead>
               <TableHead>Contact</TableHead>
@@ -117,6 +136,52 @@ const WorkersList = ({ workers, loading, onRefresh }: WorkersListProps) => {
                   <Badge variant="outline" className="capitalize">
                     {worker.role?.replace('_', ' ')}
                   </Badge>
+                </TableCell>
+                <TableCell>
+                  {worker.auto_generated_username ? (
+                    <div className="flex items-center gap-1">
+                      <code className="text-xs bg-muted px-1.5 py-0.5 rounded font-mono max-w-[160px] truncate">
+                        {worker.auto_generated_username}
+                      </code>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-6 w-6"
+                        onClick={() => copyToClipboard(worker.auto_generated_username!, `email-${worker.id}`)}
+                      >
+                        {copiedField === `email-${worker.id}` ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                      </Button>
+                    </div>
+                  ) : (
+                    <span className="text-muted-foreground text-sm">-</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {worker.auto_generated_password ? (
+                    <div className="flex items-center gap-1">
+                      <code className="text-xs bg-muted px-1.5 py-0.5 rounded font-mono">
+                        {visiblePasswords.has(worker.id) ? worker.auto_generated_password : "••••••••"}
+                      </code>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-6 w-6"
+                        onClick={() => togglePasswordVisibility(worker.id)}
+                      >
+                        {visiblePasswords.has(worker.id) ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-6 w-6"
+                        onClick={() => copyToClipboard(worker.auto_generated_password!, `pw-${worker.id}`)}
+                      >
+                        {copiedField === `pw-${worker.id}` ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                      </Button>
+                    </div>
+                  ) : (
+                    <span className="text-muted-foreground text-sm">-</span>
+                  )}
                 </TableCell>
                 <TableCell className="capitalize">{worker.gender}</TableCell>
                 <TableCell>{worker.age} years</TableCell>

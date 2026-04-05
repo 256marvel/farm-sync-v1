@@ -60,55 +60,21 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      // Check if input looks like a worker username (contains underscore)
-      const isWorkerLogin = email.includes('_');
-      
-      if (isWorkerLogin) {
-        // Worker login - find worker and use their auth email
-        const { data: worker, error: fetchError } = await supabase
-          .from('workers')
-          .select('auto_generated_username, auto_generated_password')
-          .eq('auto_generated_username', email)
-          .eq('is_active', true)
-          .maybeSingle();
+      // Sign in directly with email and password
+      // Workers use their @farmsync.com email, owners use their real email
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-        if (fetchError) throw fetchError;
-        
-        if (!worker || worker.auto_generated_password !== password) {
-          throw new Error("Invalid username or password");
-        }
-        
-        // Login using worker's Supabase auth account
-        const workerEmail = `${email}@farmsync.local`;
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: workerEmail,
-          password: password,
-        });
+      if (error) throw error;
 
-        if (signInError) throw signInError;
-        
-        toast({
-          title: "Welcome back!",
-          description: "Signed in successfully",
-        });
-        
-        setTimeout(() => navigate('/dashboard'), 1000);
-      } else {
-        // Owner/Manager login via Supabase auth
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+      toast({
+        title: "Welcome back!",
+        description: "Redirecting to your dashboard...",
+      });
 
-        if (error) throw error;
-
-        toast({
-          title: "Welcome back!",
-          description: "Redirecting to your dashboard...",
-        });
-
-        setTimeout(() => navigate("/dashboard"), 1000);
-      }
+      setTimeout(() => navigate("/dashboard"), 1000);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -153,11 +119,11 @@ const Auth = () => {
               <TabsContent value="signin">
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signin-email">Email or Username</Label>
+                    <Label htmlFor="signin-email">Email</Label>
                     <Input
                       id="signin-email"
-                      type="text"
-                      placeholder="you@example.com or worker_username"
+                      type="email"
+                      placeholder="you@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
