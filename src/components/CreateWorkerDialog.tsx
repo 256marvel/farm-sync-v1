@@ -42,7 +42,7 @@ interface CreateWorkerDialogProps {
 
 const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWorkerDialogProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [credentials, setCredentials] = useState<{ username: string; password: string } | null>(null);
+  const [credentials, setCredentials] = useState<{ email: string; password: string } | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const { toast } = useToast();
 
@@ -124,11 +124,11 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
 
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      if (!data?.username || !data?.password) {
+      if (!data?.email || !data?.password) {
         throw new Error("Failed to generate worker credentials");
       }
 
-      setCredentials({ username: data.username, password: data.password });
+      setCredentials({ email: data.email, password: data.password });
 
       toast({
         title: "Worker added successfully! 🎉",
@@ -167,17 +167,17 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
           <Card className="border-primary/20 bg-primary/5">
             <CardContent className="p-6 space-y-4">
               <div>
-                <label className="text-sm font-semibold text-muted-foreground">Username</label>
+                <label className="text-sm font-semibold text-muted-foreground">Login Email</label>
                 <div className="flex items-center gap-2 mt-1">
                   <code className="flex-1 px-3 py-2 bg-background rounded-lg border text-sm font-mono">
-                    {credentials.username}
+                    {credentials.email}
                   </code>
                   <Button
                     size="icon"
                     variant="outline"
-                    onClick={() => copyToClipboard(credentials.username, "username")}
+                    onClick={() => copyToClipboard(credentials.email, "email")}
                   >
-                    {copiedField === "username" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    {copiedField === "email" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                   </Button>
                 </div>
               </div>
