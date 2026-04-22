@@ -32,7 +32,6 @@ const FarmView = ({ farm, onBack }: FarmViewProps) => {
         .from("workers")
         .select("*")
         .eq("farm_id", farm.id)
-        .eq("is_active", true)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -47,6 +46,8 @@ const FarmView = ({ farm, onBack }: FarmViewProps) => {
       setLoading(false);
     }
   };
+
+  const activeCount = workers.filter((w) => w.is_active).length;
 
   const quickStats = [
     { label: "Team Members", value: workers.length.toString(), icon: Users, color: "from-primary to-primary/80" },
