@@ -1,10 +1,36 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Sprout, Plus, MapPin, Calendar } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Sprout,
+  Plus,
+  MapPin,
+  Calendar,
+  Users,
+  Pencil,
+  Archive,
+  MoreVertical,
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import type { Database } from "@/integrations/supabase/types";
+import EditFarmDialog from "./EditFarmDialog";
 
 type Farm = Database["public"]["Tables"]["farms"]["Row"];
 
@@ -13,9 +39,17 @@ interface FarmSelectorProps {
   onCreateFarm: () => void;
 }
 
+interface FarmStats {
+  total: number;
+  active: number;
+}
+
 const FarmSelector = ({ onFarmSelect, onCreateFarm }: FarmSelectorProps) => {
   const [farms, setFarms] = useState<Farm[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editFarm, setEditFarm] = useState<Farm | null>(null);
+  const [archiveFarm, setArchiveFarm] = useState<Farm | null>(null);
+  const [stats, setStats] = useState<Record<string, FarmStats>>({});
   const { toast } = useToast();
 
   useEffect(() => {
@@ -31,7 +65,29 @@ const FarmSelector = ({ onFarmSelect, onCreateFarm }: FarmSelectorProps) => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setFarms(data || []);
+      const list = data || [];
+      setFarms(list);
+
+      // Fetch worker counts in one query
+      if (list.length > 0) {
+        const { data: workersData } = await supabase
+          .from("workers")
+          .select("farm_id, is_active")
+          .in("farm_id", list.map((f) => f.id));
+
+        const counts: Record<string, FarmStats> = {};
+        list.forEach((f) => {
+          counts[f.id] = { total: 0, active: 0 };
+        });
+        (workersData || []).forEach((w) => {
+          if (!counts[w.farm_id]) counts[w.farm_id] = { total: 0, active: 0 };
+          counts[w.farm_id].total += 1;
+          if (w.is_active) counts[w.farm_id].active += 1;
+        });
+        setStats(counts);
+      } else {
+        setStats({});
+      }
     } catch (error: any) {
       toast({
         title: "Error loading farms",
@@ -40,6 +96,31 @@ const FarmSelector = ({ onFarmSelect, onCreateFarm }: FarmSelectorProps) => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleArchive = async () => {
+    if (!archiveFarm) return;
+    try {
+      const { error } = await supabase
+        .from("farms")
+        .update({ is_active: false })
+        .eq("id", archiveFarm.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Farm archived",
+        description: `${archiveFarm.name} has been archived. All historical data is preserved.`,
+      });
+      setArchiveFarm(null);
+      fetchFarms();
+    } catch (error: any) {
+      toast({
+        title: "Error archiving farm",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
 
@@ -96,47 +177,117 @@ const FarmSelector = ({ onFarmSelect, onCreateFarm }: FarmSelectorProps) => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {farms.map((farm, index) => (
-          <Card
-            key={farm.id}
-            className="cursor-pointer hover:shadow-xl hover:border-primary/50 transition-all hover:scale-105 animate-fade-in group"
-            style={{ animationDelay: `${index * 0.1}s` }}
-            onClick={() => onFarmSelect(farm)}
-          >
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Sprout className="w-6 h-6 text-white" />
+        {farms.map((farm, index) => {
+          const farmStats = stats[farm.id] ?? { total: 0, active: 0 };
+          return (
+            <Card
+              key={farm.id}
+              className="cursor-pointer hover:shadow-xl hover:border-primary/50 transition-all hover:scale-105 animate-fade-in group relative"
+              style={{ animationDelay: `${index * 0.1}s` }}
+              onClick={() => onFarmSelect(farm)}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Sprout className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold px-3 py-1 rounded-full bg-secondary/10 text-secondary capitalize">
+                      {farm.farm_type.replace("_", " ")}
+                    </span>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <MoreVertical className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditFarm(farm);
+                          }}
+                        >
+                          <Pencil className="w-4 h-4 mr-2" />
+                          Edit farm
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-destructive focus:text-destructive"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setArchiveFarm(farm);
+                          }}
+                        >
+                          <Archive className="w-4 h-4 mr-2" />
+                          Archive farm
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
-                <span className="text-xs font-semibold px-3 py-1 rounded-full bg-secondary/10 text-secondary capitalize">
-                  {farm.farm_type.replace("_", " ")}
-                </span>
-              </div>
-              
-              <h3 className="text-xl font-bold mb-2">{farm.name}</h3>
-              
-              <div className="space-y-2 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4" />
-                  <span>{farm.location_district}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  <span>Since {new Date(farm.start_date).toLocaleDateString()}</span>
-                </div>
-              </div>
 
-              {farm.bird_capacity && (
-                <div className="mt-4 pt-4 border-t border-border">
-                  <p className="text-sm">
-                    <span className="font-semibold text-primary">{farm.bird_capacity}</span> birds capacity
-                  </p>
+                <h3 className="text-xl font-bold mb-2">{farm.name}</h3>
+
+                <div className="space-y-2 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4" />
+                    <span>{farm.location_district}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    <span>Since {new Date(farm.start_date).toLocaleDateString()}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    <span>
+                      <span className="font-semibold text-foreground">{farmStats.active}</span>
+                      {" / "}
+                      {farmStats.total} workers
+                    </span>
+                  </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+
+                {farm.bird_capacity && (
+                  <div className="mt-4 pt-4 border-t border-border">
+                    <p className="text-sm">
+                      <span className="font-semibold text-primary">{farm.bird_capacity}</span> birds capacity
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
+
+      <EditFarmDialog
+        open={!!editFarm}
+        onOpenChange={(open) => !open && setEditFarm(null)}
+        farm={editFarm}
+        onSuccess={fetchFarms}
+      />
+
+      <AlertDialog open={!!archiveFarm} onOpenChange={(open) => !open && setArchiveFarm(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Archive this farm?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {archiveFarm?.name} will be hidden from your dashboard. All workers, egg
+              production, feed, mortality and other historical records are preserved
+              and can be restored later.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleArchive}>Archive</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
