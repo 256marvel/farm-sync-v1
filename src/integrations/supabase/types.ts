@@ -385,8 +385,10 @@ export type Database = {
           age: number
           auto_generated_password: string | null
           auto_generated_username: string | null
+          contact_address: string | null
           contact_phone: string | null
           created_at: string
+          date_of_birth: string | null
           farm_id: string
           full_name: string
           gender: string
@@ -405,8 +407,10 @@ export type Database = {
           age: number
           auto_generated_password?: string | null
           auto_generated_username?: string | null
+          contact_address?: string | null
           contact_phone?: string | null
           created_at?: string
+          date_of_birth?: string | null
           farm_id: string
           full_name: string
           gender: string
@@ -425,8 +429,10 @@ export type Database = {
           age?: number
           auto_generated_password?: string | null
           auto_generated_username?: string | null
+          contact_address?: string | null
           contact_phone?: string | null
           created_at?: string
+          date_of_birth?: string | null
           farm_id?: string
           full_name?: string
           gender?: string

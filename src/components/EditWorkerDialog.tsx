@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
@@ -19,12 +20,13 @@ const formSchema = z.object({
   role: z.enum(["caretaker", "manager", "assistant_manager", "accountant", "worker"]),
   gender: z.enum(["male", "female", "other"]),
   age: z.string().min(1, "Age is required"),
+  date_of_birth: z.string().optional(),
+  contact_address: z.string().optional(),
   contact_phone: z.string().optional(),
   nin: z.string().optional(),
   next_of_kin_name: z.string().min(2, "Next of kin name is required"),
   next_of_kin_relationship: z.enum(["parent", "sibling", "spouse", "child", "relative", "friend"]),
   next_of_kin_phone: z.string().min(10, "Valid phone number is required"),
-  is_active: z.boolean(),
 }).refine((data) => {
   const rolesRequiringNIN = ["caretaker", "manager", "assistant_manager", "accountant"];
   if (rolesRequiringNIN.includes(data.role) && !data.nin) {
@@ -54,12 +56,13 @@ const EditWorkerDialog = ({ open, onOpenChange, worker, onSuccess }: EditWorkerD
       role: "worker",
       gender: "male",
       age: "",
+      date_of_birth: "",
+      contact_address: "",
       contact_phone: "",
       nin: "",
       next_of_kin_name: "",
       next_of_kin_relationship: "parent",
       next_of_kin_phone: "",
-      is_active: true,
     },
   });
 
@@ -70,19 +73,20 @@ const EditWorkerDialog = ({ open, onOpenChange, worker, onSuccess }: EditWorkerD
         role: worker.role,
         gender: worker.gender as "male" | "female" | "other",
         age: worker.age.toString(),
+        date_of_birth: worker.date_of_birth || "",
+        contact_address: worker.contact_address || "",
         contact_phone: worker.contact_phone || "",
         nin: worker.nin || "",
         next_of_kin_name: worker.next_of_kin_name,
         next_of_kin_relationship: worker.next_of_kin_relationship as any,
         next_of_kin_phone: worker.next_of_kin_phone,
-        is_active: worker.is_active ?? true,
       });
     }
   }, [worker, form]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!worker) return;
-    
+
     setIsSubmitting(true);
     try {
       const { error } = await supabase
@@ -92,12 +96,13 @@ const EditWorkerDialog = ({ open, onOpenChange, worker, onSuccess }: EditWorkerD
           role: values.role,
           gender: values.gender,
           age: parseInt(values.age),
+          date_of_birth: values.date_of_birth || null,
+          contact_address: values.contact_address || null,
           contact_phone: values.contact_phone || null,
           nin: values.nin || null,
           next_of_kin_name: values.next_of_kin_name,
           next_of_kin_relationship: values.next_of_kin_relationship,
           next_of_kin_phone: values.next_of_kin_phone,
-          is_active: values.is_active,
         })
         .eq("id", worker.id);
 
@@ -211,14 +216,49 @@ const EditWorkerDialog = ({ open, onOpenChange, worker, onSuccess }: EditWorkerD
               />
             </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="date_of_birth"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Date of Birth</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="contact_phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Contact Phone</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Optional" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
             <FormField
               control={form.control}
-              name="contact_phone"
+              name="contact_address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Contact Phone</FormLabel>
+                  <FormLabel>Address</FormLabel>
                   <FormControl>
-                    <Input placeholder="Optional" {...field} />
+                    <Textarea
+                      placeholder="Village, parish, district, etc."
+                      className="resize-none"
+                      rows={2}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -236,28 +276,6 @@ const EditWorkerDialog = ({ open, onOpenChange, worker, onSuccess }: EditWorkerD
                   <FormControl>
                     <Input placeholder="Enter NIN" {...field} />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="is_active"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Status *</FormLabel>
-                  <Select onValueChange={(value) => field.onChange(value === "true")} value={field.value.toString()}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="true">Active</SelectItem>
-                      <SelectItem value="false">Inactive</SelectItem>
-                    </SelectContent>
-                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
