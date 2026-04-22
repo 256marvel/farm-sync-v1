@@ -30,10 +30,22 @@ const Dashboard = () => {
       // Check if user is a worker
       const { data: workerData } = await supabase
         .from("workers")
-        .select("id")
+        .select("id, is_active")
         .eq("user_id", userId)
         .maybeSingle();
-      
+
+      // If they are a deactivated worker, sign them out immediately
+      if (workerData && workerData.is_active === false) {
+        await supabase.auth.signOut();
+        toast({
+          title: "Account deactivated",
+          description: "Your account has been deactivated. Please contact your farm owner.",
+          variant: "destructive",
+        });
+        navigate("/auth");
+        return;
+      }
+
       setIsWorker(!!workerData);
     };
 
@@ -61,7 +73,7 @@ const Dashboard = () => {
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, toast]);
 
   const handleSignOut = async () => {
     try {
