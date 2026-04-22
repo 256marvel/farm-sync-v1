@@ -50,7 +50,7 @@ const FarmView = ({ farm, onBack }: FarmViewProps) => {
   const activeCount = workers.filter((w) => w.is_active).length;
 
   const quickStats = [
-    { label: "Team Members", value: workers.length.toString(), icon: Users, color: "from-primary to-primary/80" },
+    { label: "Active Workers", value: `${activeCount} / ${workers.length}`, icon: Users, color: "from-primary to-primary/80" },
     { label: "This Month", value: "0 trays", icon: TrendingUp, color: "from-secondary to-secondary/80" },
     { label: "Reports", value: "0", icon: BarChart3, color: "from-accent to-accent/80" },
   ];
