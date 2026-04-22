@@ -56,12 +56,13 @@ const EditWorkerDialog = ({ open, onOpenChange, worker, onSuccess }: EditWorkerD
       role: "worker",
       gender: "male",
       age: "",
+      date_of_birth: "",
+      contact_address: "",
       contact_phone: "",
       nin: "",
       next_of_kin_name: "",
       next_of_kin_relationship: "parent",
       next_of_kin_phone: "",
-      is_active: true,
     },
   });
 
@@ -72,19 +73,20 @@ const EditWorkerDialog = ({ open, onOpenChange, worker, onSuccess }: EditWorkerD
         role: worker.role,
         gender: worker.gender as "male" | "female" | "other",
         age: worker.age.toString(),
+        date_of_birth: worker.date_of_birth || "",
+        contact_address: worker.contact_address || "",
         contact_phone: worker.contact_phone || "",
         nin: worker.nin || "",
         next_of_kin_name: worker.next_of_kin_name,
         next_of_kin_relationship: worker.next_of_kin_relationship as any,
         next_of_kin_phone: worker.next_of_kin_phone,
-        is_active: worker.is_active ?? true,
       });
     }
   }, [worker, form]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!worker) return;
-    
+
     setIsSubmitting(true);
     try {
       const { error } = await supabase
@@ -94,12 +96,13 @@ const EditWorkerDialog = ({ open, onOpenChange, worker, onSuccess }: EditWorkerD
           role: values.role,
           gender: values.gender,
           age: parseInt(values.age),
+          date_of_birth: values.date_of_birth || null,
+          contact_address: values.contact_address || null,
           contact_phone: values.contact_phone || null,
           nin: values.nin || null,
           next_of_kin_name: values.next_of_kin_name,
           next_of_kin_relationship: values.next_of_kin_relationship,
           next_of_kin_phone: values.next_of_kin_phone,
-          is_active: values.is_active,
         })
         .eq("id", worker.id);
 
