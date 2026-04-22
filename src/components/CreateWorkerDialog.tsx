@@ -122,10 +122,28 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
         },
       });
 
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      console.log("create-worker response:", { data, error });
+
+      // When the edge function returns a non-2xx status, supabase-js puts a
+      // FunctionsHttpError in `error` but the actual JSON body is on `data`.
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+      if (error) {
+        // Try to read the response body from the FunctionsHttpError context
+        const ctx = (error as any)?.context;
+        if (ctx && typeof ctx.json === "function") {
+          try {
+            const body = await ctx.json();
+            if (body?.error) throw new Error(body.error);
+          } catch (parseErr) {
+            // fall through
+          }
+        }
+        throw error;
+      }
       if (!data?.email || !data?.password) {
-        throw new Error("Failed to generate worker credentials");
+        throw new Error("Worker was saved but credentials were not returned. Please refresh the workers list.");
       }
 
       setCredentials({ email: data.email, password: data.password });
