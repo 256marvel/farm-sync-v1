@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
@@ -19,12 +20,13 @@ const formSchema = z.object({
   role: z.enum(["caretaker", "manager", "assistant_manager", "accountant", "worker"]),
   gender: z.enum(["male", "female", "other"]),
   age: z.string().min(1, "Age is required"),
+  date_of_birth: z.string().optional(),
+  contact_address: z.string().optional(),
   contact_phone: z.string().optional(),
   nin: z.string().optional(),
   next_of_kin_name: z.string().min(2, "Next of kin name is required"),
   next_of_kin_relationship: z.enum(["parent", "sibling", "spouse", "child", "relative", "friend"]),
   next_of_kin_phone: z.string().min(10, "Valid phone number is required"),
-  is_active: z.boolean(),
 }).refine((data) => {
   const rolesRequiringNIN = ["caretaker", "manager", "assistant_manager", "accountant"];
   if (rolesRequiringNIN.includes(data.role) && !data.nin) {
