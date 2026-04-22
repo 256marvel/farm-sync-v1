@@ -62,12 +62,32 @@ const Auth = () => {
     try {
       // Sign in directly with email and password
       // Workers use their @farmsync.com email, owners use their real email
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data: signInData, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw error;
+
+      // Check if this account is a deactivated worker — block them at app level
+      if (signInData.user) {
+        const { data: workerRow } = await supabase
+          .from("workers")
+          .select("id, is_active")
+          .eq("user_id", signInData.user.id)
+          .maybeSingle();
+
+        if (workerRow && workerRow.is_active === false) {
+          await supabase.auth.signOut();
+          toast({
+            title: "Account deactivated",
+            description: "Your account has been deactivated. Please contact your farm owner.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+      }
 
       toast({
         title: "Welcome back!",
