@@ -24,6 +24,8 @@ const formSchema = z.object({
   contact_address: z.string().optional(),
   contact_phone: z.string().optional(),
   nin: z.string().optional(),
+  monthly_salary: z.string().optional(),
+  house_assignment: z.string().optional(),
   next_of_kin_name: z.string().min(2, "Next of kin name is required"),
   next_of_kin_relationship: z.enum(["parent", "sibling", "spouse", "child", "relative", "friend"]),
   next_of_kin_phone: z.string().min(10, "Valid phone number is required"),
@@ -60,6 +62,8 @@ const EditWorkerDialog = ({ open, onOpenChange, worker, onSuccess }: EditWorkerD
       contact_address: "",
       contact_phone: "",
       nin: "",
+      monthly_salary: "",
+      house_assignment: "",
       next_of_kin_name: "",
       next_of_kin_relationship: "parent",
       next_of_kin_phone: "",
@@ -77,6 +81,8 @@ const EditWorkerDialog = ({ open, onOpenChange, worker, onSuccess }: EditWorkerD
         contact_address: worker.contact_address || "",
         contact_phone: worker.contact_phone || "",
         nin: worker.nin || "",
+        monthly_salary: worker.monthly_salary != null ? String(worker.monthly_salary) : "",
+        house_assignment: worker.house_assignment || "",
         next_of_kin_name: worker.next_of_kin_name,
         next_of_kin_relationship: worker.next_of_kin_relationship as any,
         next_of_kin_phone: worker.next_of_kin_phone,
@@ -100,6 +106,8 @@ const EditWorkerDialog = ({ open, onOpenChange, worker, onSuccess }: EditWorkerD
           contact_address: values.contact_address || null,
           contact_phone: values.contact_phone || null,
           nin: values.nin || null,
+          monthly_salary: values.monthly_salary ? Number(values.monthly_salary) : null,
+          house_assignment: values.house_assignment || null,
           next_of_kin_name: values.next_of_kin_name,
           next_of_kin_relationship: values.next_of_kin_relationship,
           next_of_kin_phone: values.next_of_kin_phone,
@@ -280,6 +288,38 @@ const EditWorkerDialog = ({ open, onOpenChange, worker, onSuccess }: EditWorkerD
                 </FormItem>
               )}
             />
+
+            <div className="border-t pt-6">
+              <h3 className="text-lg font-semibold mb-4">Job & Compensation</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="house_assignment"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>House / Job Area</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., House A, Layer Pen 2" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="monthly_salary"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Monthly Salary (UGX)</FormLabel>
+                      <FormControl>
+                        <Input type="number" min="0" step="1000" placeholder="e.g., 350000" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
 
             <div className="border-t pt-6">
               <h3 className="text-lg font-semibold mb-4">Next of Kin Information</h3>

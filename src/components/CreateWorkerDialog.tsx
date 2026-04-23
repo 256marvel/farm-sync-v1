@@ -18,7 +18,11 @@ const formSchema = z.object({
   gender: z.enum(["male", "female", "other"]),
   age: z.string().min(1, "Age is required"),
   contact_phone: z.string().optional(),
+  contact_address: z.string().optional(),
+  date_of_birth: z.string().optional(),
   nin: z.string().optional(),
+  monthly_salary: z.string().optional(),
+  house_assignment: z.string().optional(),
   next_of_kin_name: z.string().min(2, "Next of kin name is required"),
   next_of_kin_relationship: z.enum(["parent", "sibling", "spouse", "child", "relative", "friend"]),
   next_of_kin_phone: z.string().min(10, "Valid phone number is required"),
@@ -54,7 +58,11 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
       gender: "male",
       age: "",
       contact_phone: "",
+      contact_address: "",
+      date_of_birth: "",
       nin: "",
+      monthly_salary: "",
+      house_assignment: "",
       next_of_kin_name: "",
       next_of_kin_relationship: "parent",
       next_of_kin_phone: "",
@@ -115,7 +123,11 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
           gender: values.gender,
           age: parseInt(values.age),
           contactPhone: values.contact_phone || null,
+          contactAddress: values.contact_address || null,
+          dateOfBirth: values.date_of_birth || null,
           nin: values.nin || null,
+          monthlySalary: values.monthly_salary ? Number(values.monthly_salary) : null,
+          houseAssignment: values.house_assignment || null,
           nextOfKinName: values.next_of_kin_name,
           nextOfKinRelationship: values.next_of_kin_relationship,
           nextOfKinPhone: values.next_of_kin_phone,
@@ -335,19 +347,82 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
 
             <FormField
               control={form.control}
-              name="nin"
+              name="contact_address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    National ID (NIN) {["caretaker", "manager", "assistant_manager", "accountant"].includes(form.watch("role")) && "*"}
-                  </FormLabel>
+                  <FormLabel>Address</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter NIN" {...field} />
+                    <Input placeholder="Village, parish, district..." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="date_of_birth"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Date of Birth</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="nin"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      National ID (NIN) {["caretaker", "manager", "assistant_manager", "accountant"].includes(form.watch("role")) && "*"}
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter NIN" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="border-t pt-6">
+              <h3 className="text-lg font-semibold mb-4">Job & Compensation</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="house_assignment"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>House / Job Area</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., House A, Layer Pen 2" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="monthly_salary"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Monthly Salary (UGX)</FormLabel>
+                      <FormControl>
+                        <Input type="number" min="0" step="1000" placeholder="e.g., 350000" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
 
             <div className="border-t pt-6">
               <h3 className="text-lg font-semibold mb-4">Next of Kin Information</h3>

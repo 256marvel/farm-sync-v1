@@ -214,12 +214,11 @@ const WorkersList = ({ workers, loading, onRefresh }: WorkersListProps) => {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Role</TableHead>
+              <TableHead>House</TableHead>
+              <TableHead>Salary (UGX)</TableHead>
               <TableHead>Login Email</TableHead>
               <TableHead>Password</TableHead>
-              <TableHead>Gender</TableHead>
-              <TableHead>Age</TableHead>
               <TableHead>Contact</TableHead>
-              <TableHead>Next of Kin</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -227,7 +226,7 @@ const WorkersList = ({ workers, loading, onRefresh }: WorkersListProps) => {
           <TableBody>
             {filteredWorkers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={10} className="text-center text-muted-foreground py-8">
+                <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
                   No workers match your filters
                 </TableCell>
               </TableRow>
@@ -242,7 +241,7 @@ const WorkersList = ({ workers, loading, onRefresh }: WorkersListProps) => {
                       <div>
                         <p className="font-medium">{worker.full_name}</p>
                         <p className="text-xs text-muted-foreground">
-                          {worker.auto_generated_username}
+                          {worker.gender} · {worker.age} yrs
                         </p>
                       </div>
                     </div>
@@ -251,6 +250,18 @@ const WorkersList = ({ workers, loading, onRefresh }: WorkersListProps) => {
                     <Badge variant="outline" className="capitalize">
                       {worker.role?.replace("_", " ")}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {worker.house_assignment ? (
+                      <span className="text-sm">{worker.house_assignment}</span>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">—</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="font-mono">
+                    {worker.monthly_salary != null
+                      ? Number(worker.monthly_salary).toLocaleString()
+                      : <span className="text-muted-foreground text-sm">Not set</span>}
                   </TableCell>
                   <TableCell>
                     {worker.auto_generated_username ? (
@@ -298,8 +309,6 @@ const WorkersList = ({ workers, loading, onRefresh }: WorkersListProps) => {
                       <span className="text-muted-foreground text-sm">-</span>
                     )}
                   </TableCell>
-                  <TableCell className="capitalize">{worker.gender}</TableCell>
-                  <TableCell>{worker.age} years</TableCell>
                   <TableCell>
                     {worker.contact_phone ? (
                       <div className="flex items-center gap-1 text-sm">
@@ -309,14 +318,6 @@ const WorkersList = ({ workers, loading, onRefresh }: WorkersListProps) => {
                     ) : (
                       <span className="text-muted-foreground text-sm">-</span>
                     )}
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      <p className="font-medium">{worker.next_of_kin_name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {worker.next_of_kin_relationship}
-                      </p>
-                    </div>
                   </TableCell>
                   <TableCell>
                     <Badge

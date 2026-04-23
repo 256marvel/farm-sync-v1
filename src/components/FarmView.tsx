@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Users, Plus, TrendingUp, BarChart3, Sprout } from "lucide-react";
+import { ArrowLeft, Users, Plus, TrendingUp, BarChart3, Sprout, Wallet } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 import CreateWorkerDialog from "./CreateWorkerDialog";
 import WorkersList from "./WorkersList";
+import StaffDirectory from "./StaffDirectory";
 
 type Farm = Database["public"]["Tables"]["farms"]["Row"];
 type Worker = Database["public"]["Tables"]["workers"]["Row"];
@@ -48,10 +50,18 @@ const FarmView = ({ farm, onBack }: FarmViewProps) => {
   };
 
   const activeCount = workers.filter((w) => w.is_active).length;
+  const totalPayroll = workers
+    .filter((w) => w.is_active)
+    .reduce((s, w) => s + (w.monthly_salary ? Number(w.monthly_salary) : 0), 0);
+  const formattedPayroll = new Intl.NumberFormat("en-UG", {
+    style: "currency",
+    currency: "UGX",
+    maximumFractionDigits: 0,
+  }).format(totalPayroll);
 
   const quickStats = [
     { label: "Active Workers", value: `${activeCount} / ${workers.length}`, icon: Users, color: "from-primary to-primary/80" },
-    { label: "This Month", value: "0 trays", icon: TrendingUp, color: "from-secondary to-secondary/80" },
+    { label: "Monthly Payroll", value: formattedPayroll, icon: Wallet, color: "from-secondary to-secondary/80" },
     { label: "Reports", value: "0", icon: BarChart3, color: "from-accent to-accent/80" },
   ];
 
@@ -93,7 +103,7 @@ const FarmView = ({ farm, onBack }: FarmViewProps) => {
                 <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center`}>
                   <stat.icon className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-2xl font-bold">{stat.value}</span>
+                <span className="text-xl font-bold">{stat.value}</span>
               </div>
               <p className="text-sm text-muted-foreground">{stat.label}</p>
             </CardContent>
@@ -101,13 +111,13 @@ const FarmView = ({ farm, onBack }: FarmViewProps) => {
         ))}
       </div>
 
-      {/* Workers Section */}
+      {/* Workers Section with tabs */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
               <CardTitle className="text-2xl">Farm Workers</CardTitle>
-              <CardDescription>Manage your team members</CardDescription>
+              <CardDescription>Manage your team and view the employee directory</CardDescription>
             </div>
             <Button
               onClick={() => setCreateWorkerOpen(true)}
@@ -119,7 +129,18 @@ const FarmView = ({ farm, onBack }: FarmViewProps) => {
           </div>
         </CardHeader>
         <CardContent>
-          <WorkersList workers={workers} loading={loading} onRefresh={fetchWorkers} />
+          <Tabs defaultValue="manage">
+            <TabsList>
+              <TabsTrigger value="manage">Management</TabsTrigger>
+              <TabsTrigger value="directory">Employee Directory</TabsTrigger>
+            </TabsList>
+            <TabsContent value="manage" className="mt-4">
+              <WorkersList workers={workers} loading={loading} onRefresh={fetchWorkers} />
+            </TabsContent>
+            <TabsContent value="directory" className="mt-4">
+              <StaffDirectory farmId={farm.id} viewerRole="owner" />
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 

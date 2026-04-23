@@ -14,6 +14,10 @@ type WorkerPayload = {
   age: number;
   contactPhone?: string | null;
   nin?: string | null;
+  monthlySalary?: number | null;
+  houseAssignment?: string | null;
+  dateOfBirth?: string | null;
+  contactAddress?: string | null;
   nextOfKinName: string;
   nextOfKinRelationship: "parent" | "sibling" | "spouse" | "child" | "relative" | "friend";
   nextOfKinPhone: string;
@@ -71,6 +75,10 @@ serve(async (req) => {
       age,
       contactPhone,
       nin,
+      monthlySalary,
+      houseAssignment,
+      dateOfBirth,
+      contactAddress,
       nextOfKinName,
       nextOfKinRelationship,
       nextOfKinPhone,
@@ -215,7 +223,11 @@ serve(async (req) => {
       gender,
       age,
       contact_phone: contactPhone || null,
+      contact_address: contactAddress || null,
+      date_of_birth: dateOfBirth || null,
       nin: nin || null,
+      monthly_salary: monthlySalary ?? null,
+      house_assignment: houseAssignment || null,
       next_of_kin_name: nextOfKinName,
       next_of_kin_relationship: nextOfKinRelationship,
       next_of_kin_phone: nextOfKinPhone,
