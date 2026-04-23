@@ -11,8 +11,11 @@ import CreateFarmDialog from "@/components/CreateFarmDialog";
 import FarmView from "@/components/FarmView";
 import SettingsDialog from "@/components/SettingsDialog";
 import WorkerDashboard from "@/components/WorkerDashboard";
+import StaffDashboard from "@/components/StaffDashboard";
+import AccountantDashboard from "@/components/AccountantDashboard";
 
 type Farm = Database["public"]["Tables"]["farms"]["Row"];
+type WorkerRole = Database["public"]["Enums"]["worker_role"];
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -23,18 +26,17 @@ const Dashboard = () => {
   const [createFarmOpen, setCreateFarmOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [workerRole, setWorkerRole] = useState<WorkerRole | null>(null);
   const [isWorker, setIsWorker] = useState(false);
 
   useEffect(() => {
     const checkUserRole = async (userId: string) => {
-      // Check if user is a worker
       const { data: workerData } = await supabase
         .from("workers")
-        .select("id, is_active")
+        .select("id, is_active, role")
         .eq("user_id", userId)
         .maybeSingle();
 
-      // If they are a deactivated worker, sign them out immediately
       if (workerData && workerData.is_active === false) {
         await supabase.auth.signOut();
         toast({
@@ -47,9 +49,9 @@ const Dashboard = () => {
       }
 
       setIsWorker(!!workerData);
+      setWorkerRole((workerData?.role as WorkerRole) ?? null);
     };
 
-    // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user);
@@ -60,7 +62,6 @@ const Dashboard = () => {
       setIsLoading(false);
     });
 
-    // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -78,31 +79,16 @@ const Dashboard = () => {
   const handleSignOut = async () => {
     try {
       await supabase.auth.signOut();
-      toast({
-        title: "Signed out successfully",
-        description: "See you soon!",
-      });
+      toast({ title: "Signed out successfully", description: "See you soon!" });
       navigate("/");
     } catch (error: any) {
-      toast({
-        title: "Error signing out",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Error signing out", description: error.message, variant: "destructive" });
     }
   };
 
-  const handleFarmCreated = () => {
-    setRefreshKey(prev => prev + 1);
-  };
-
-  const handleFarmSelect = (farm: Farm) => {
-    setSelectedFarm(farm);
-  };
-
-  const handleBackToFarms = () => {
-    setSelectedFarm(null);
-  };
+  const handleFarmCreated = () => setRefreshKey((prev) => prev + 1);
+  const handleFarmSelect = (farm: Farm) => setSelectedFarm(farm);
+  const handleBackToFarms = () => setSelectedFarm(null);
 
   if (isLoading) {
     return (
@@ -114,9 +100,20 @@ const Dashboard = () => {
     );
   }
 
+  // Decide which dashboard to render for staff/worker users
+  const renderStaffOrWorkerView = () => {
+    if (!user) return null;
+    if (workerRole === "worker") return <WorkerDashboard userId={user.id} />;
+    if (workerRole === "accountant") return <AccountantDashboard userId={user.id} />;
+    if (workerRole === "manager" || workerRole === "assistant_manager" || workerRole === "caretaker") {
+      return <StaffDashboard userId={user.id} role={workerRole} />;
+    }
+    // Fallback
+    return <WorkerDashboard userId={user.id} />;
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -145,7 +142,7 @@ const Dashboard = () => {
 
       <main className="container mx-auto px-4 py-8">
         {isWorker ? (
-          <WorkerDashboard userId={user!.id} />
+          renderStaffOrWorkerView()
         ) : selectedFarm ? (
           <FarmView farm={selectedFarm} onBack={handleBackToFarms} />
         ) : (
@@ -172,11 +169,7 @@ const Dashboard = () => {
         onSuccess={handleFarmCreated}
       />
 
-      <SettingsDialog
-        open={settingsOpen}
-        onOpenChange={setSettingsOpen}
-        user={user}
-      />
+      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} user={user} />
     </div>
   );
 };

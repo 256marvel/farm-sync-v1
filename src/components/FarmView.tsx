@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Users, Plus, TrendingUp, BarChart3, Sprout } from "lucide-react";
+import { ArrowLeft, Users, Plus, TrendingUp, BarChart3, Sprout, Wallet } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 import CreateWorkerDialog from "./CreateWorkerDialog";
 import WorkersList from "./WorkersList";
+import StaffDirectory from "./StaffDirectory";
 
 type Farm = Database["public"]["Tables"]["farms"]["Row"];
 type Worker = Database["public"]["Tables"]["workers"]["Row"];
