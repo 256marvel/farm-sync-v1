@@ -347,19 +347,82 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
 
             <FormField
               control={form.control}
-              name="nin"
+              name="contact_address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    National ID (NIN) {["caretaker", "manager", "assistant_manager", "accountant"].includes(form.watch("role")) && "*"}
-                  </FormLabel>
+                  <FormLabel>Address</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter NIN" {...field} />
+                    <Input placeholder="Village, parish, district..." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="date_of_birth"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Date of Birth</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="nin"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      National ID (NIN) {["caretaker", "manager", "assistant_manager", "accountant"].includes(form.watch("role")) && "*"}
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter NIN" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="border-t pt-6">
+              <h3 className="text-lg font-semibold mb-4">Job & Compensation</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="house_assignment"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>House / Job Area</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., House A, Layer Pen 2" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="monthly_salary"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Monthly Salary (UGX)</FormLabel>
+                      <FormControl>
+                        <Input type="number" min="0" step="1000" placeholder="e.g., 350000" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
 
             <div className="border-t pt-6">
               <h3 className="text-lg font-semibold mb-4">Next of Kin Information</h3>
