@@ -392,9 +392,11 @@ export type Database = {
           farm_id: string
           full_name: string
           gender: string
+          house_assignment: string | null
           id: string
           is_active: boolean | null
           manager_id: string | null
+          monthly_salary: number | null
           next_of_kin_name: string
           next_of_kin_phone: string
           next_of_kin_relationship: string
@@ -414,9 +416,11 @@ export type Database = {
           farm_id: string
           full_name: string
           gender: string
+          house_assignment?: string | null
           id?: string
           is_active?: boolean | null
           manager_id?: string | null
+          monthly_salary?: number | null
           next_of_kin_name: string
           next_of_kin_phone: string
           next_of_kin_relationship: string
@@ -436,9 +440,11 @@ export type Database = {
           farm_id?: string
           full_name?: string
           gender?: string
+          house_assignment?: string | null
           id?: string
           is_active?: boolean | null
           manager_id?: string | null
+          monthly_salary?: number | null
           next_of_kin_name?: string
           next_of_kin_phone?: string
           next_of_kin_relationship?: string
@@ -462,6 +468,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_user_farm_role: {
+        Args: { _farm_id: string; _user_id: string }
+        Returns: string
+      }
       get_worker_farm_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
