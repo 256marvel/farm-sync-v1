@@ -115,20 +115,20 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
-                <Sprout className="w-6 h-6 text-white" />
+        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shrink-0">
+                <Sprout className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-              <div>
-                <h1 className="text-xl font-bold">FarmSync</h1>
-                <p className="text-xs text-muted-foreground">
+              <div className="min-w-0">
+                <h1 className="text-lg sm:text-xl font-bold">FarmSync</h1>
+                <p className="text-xs text-muted-foreground truncate max-w-[180px] sm:max-w-none">
                   {user?.user_metadata?.full_name || user?.email}
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
               <Button variant="ghost" size="icon" onClick={() => setSettingsOpen(true)}>
                 <Settings className="w-5 h-5" />
               </Button>
