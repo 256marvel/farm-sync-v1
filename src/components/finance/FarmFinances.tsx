@@ -412,7 +412,7 @@ const FarmFinances = ({ farmId, userId, canDelete, canAdd = true }: Props) => {
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <KindBadge kind={row.kind} />
-                    <span className="text-sm font-medium truncate">{formatCategory(row.category)}</span>
+                    <span className="text-sm font-medium truncate">{formatCategory(row.category as any)}</span>
                     <span className="text-xs text-muted-foreground">· {row.count}</span>
                   </div>
                   <span className={`font-mono font-semibold whitespace-nowrap ${KIND_META[row.kind].tone}`}>
