@@ -106,13 +106,13 @@ const WorkerDashboard = ({ userId }: WorkerDashboardProps) => {
   return (
     <div className="space-y-6 animate-slide-up">
       {/* Welcome Hero */}
-      <div className="rounded-2xl bg-gradient-to-br from-primary/10 via-secondary/5 to-background border p-6">
-        <div className="flex items-start justify-between flex-wrap gap-4">
-          <div>
-            <h2 className="text-3xl font-bold mb-1">
+      <div className="rounded-2xl bg-gradient-to-br from-primary/10 via-secondary/5 to-background border p-4 sm:p-6">
+        <div className="flex items-start justify-between flex-wrap gap-3 sm:gap-4">
+          <div className="min-w-0">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-1">
               Welcome, {worker.full_name.split(" ")[0]} 👋
             </h2>
-            <p className="text-muted-foreground">{farm.name} · {farm.location_district}</p>
+            <p className="text-sm sm:text-base text-muted-foreground">{farm.name} · {farm.location_district}</p>
             <div className="flex items-center gap-2 mt-3 flex-wrap">
               <Badge className="capitalize bg-primary/15 text-primary hover:bg-primary/20">
                 <Briefcase className="w-3 h-3 mr-1" /> {formatRole(worker.role)}
@@ -125,11 +125,11 @@ const WorkerDashboard = ({ userId }: WorkerDashboardProps) => {
             </div>
           </div>
           {worker.monthly_salary != null && (
-            <div className="text-right">
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground justify-end">
+            <div className="text-left sm:text-right w-full sm:w-auto">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground sm:justify-end">
                 <Wallet className="w-3.5 h-3.5" /> My Monthly Salary
               </div>
-              <p className="text-2xl font-bold text-primary">{formatUGX(Number(worker.monthly_salary))}</p>
+              <p className="text-xl sm:text-2xl font-bold text-primary">{formatUGX(Number(worker.monthly_salary))}</p>
             </div>
           )}
         </div>
