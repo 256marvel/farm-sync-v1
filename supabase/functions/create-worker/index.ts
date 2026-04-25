@@ -18,6 +18,7 @@ type WorkerPayload = {
   houseAssignment?: string | null;
   dateOfBirth?: string | null;
   contactAddress?: string | null;
+  isAlsoAccountant?: boolean;
   nextOfKinName: string;
   nextOfKinRelationship: "parent" | "sibling" | "spouse" | "child" | "relative" | "friend";
   nextOfKinPhone: string;
