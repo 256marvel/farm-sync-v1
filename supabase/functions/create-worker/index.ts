@@ -230,6 +230,7 @@ serve(async (req) => {
       nin: nin || null,
       monthly_salary: monthlySalary ?? null,
       house_assignment: houseAssignment || null,
+      is_also_accountant: role === "manager" ? !!isAlsoAccountant : false,
       next_of_kin_name: nextOfKinName,
       next_of_kin_relationship: nextOfKinRelationship,
       next_of_kin_phone: nextOfKinPhone,
