@@ -9,6 +9,7 @@ import type { Database } from "@/integrations/supabase/types";
 import CreateWorkerDialog from "./CreateWorkerDialog";
 import WorkersList from "./WorkersList";
 import StaffDirectory from "./StaffDirectory";
+import FarmFinances from "./finance/FarmFinances";
 
 type Farm = Database["public"]["Tables"]["farms"]["Row"];
 type Worker = Database["public"]["Tables"]["workers"]["Row"];
