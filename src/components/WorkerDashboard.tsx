@@ -215,11 +215,11 @@ const WorkerDashboard = ({ userId }: WorkerDashboardProps) => {
 const ActionButton = ({ icon: Icon, label, onClick }: { icon: any; label: string; onClick: () => void }) => (
   <Button
     variant="outline"
-    className="h-24 flex-col gap-2 hover:border-primary hover:bg-primary/5 transition-all"
+    className="h-20 sm:h-24 flex-col gap-1.5 sm:gap-2 hover:border-primary hover:bg-primary/5 transition-all px-2"
     onClick={onClick}
   >
-    <Icon className="w-6 h-6 text-primary" />
-    <span className="text-xs font-medium">{label}</span>
+    <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+    <span className="text-[11px] sm:text-xs font-medium text-center leading-tight">{label}</span>
   </Button>
 );
 
