@@ -64,6 +64,7 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
       nin: "",
       monthly_salary: "",
       house_assignment: "",
+      is_also_accountant: false,
       next_of_kin_name: "",
       next_of_kin_relationship: "parent",
       next_of_kin_phone: "",
