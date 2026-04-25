@@ -23,6 +23,7 @@ const formSchema = z.object({
   nin: z.string().optional(),
   monthly_salary: z.string().optional(),
   house_assignment: z.string().optional(),
+  is_also_accountant: z.boolean().optional(),
   next_of_kin_name: z.string().min(2, "Next of kin name is required"),
   next_of_kin_relationship: z.enum(["parent", "sibling", "spouse", "child", "relative", "friend"]),
   next_of_kin_phone: z.string().min(10, "Valid phone number is required"),
