@@ -130,6 +130,7 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
           nin: values.nin || null,
           monthlySalary: values.monthly_salary ? Number(values.monthly_salary) : null,
           houseAssignment: values.house_assignment || null,
+          isAlsoAccountant: values.role === "manager" ? !!values.is_also_accountant : false,
           nextOfKinName: values.next_of_kin_name,
           nextOfKinRelationship: values.next_of_kin_relationship,
           nextOfKinPhone: values.next_of_kin_phone,
