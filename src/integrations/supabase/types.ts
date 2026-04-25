@@ -68,6 +68,59 @@ export type Database = {
           },
         ]
       }
+      farm_transactions: {
+        Row: {
+          amount: number
+          category: Database["public"]["Enums"]["transaction_category"]
+          created_at: string
+          date: string
+          description: string | null
+          farm_id: string
+          id: string
+          kind: Database["public"]["Enums"]["transaction_kind"]
+          payment_method: string | null
+          recorded_by: string
+          reference: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          category: Database["public"]["Enums"]["transaction_category"]
+          created_at?: string
+          date?: string
+          description?: string | null
+          farm_id: string
+          id?: string
+          kind: Database["public"]["Enums"]["transaction_kind"]
+          payment_method?: string | null
+          recorded_by: string
+          reference?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category?: Database["public"]["Enums"]["transaction_category"]
+          created_at?: string
+          date?: string
+          description?: string | null
+          farm_id?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["transaction_kind"]
+          payment_method?: string | null
+          recorded_by?: string
+          reference?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "farm_transactions_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "farms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       farms: {
         Row: {
           bird_capacity: number | null
@@ -480,6 +533,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_farm_accountant: {
+        Args: { _farm_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_farm_finance_staff: {
+        Args: { _farm_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_worker_on_farm: {
         Args: { _farm_id: string; _user_id: string }
         Returns: boolean
@@ -497,6 +558,25 @@ export type Database = {
         | "assistant_manager"
         | "accountant"
         | "worker"
+      transaction_category:
+        | "egg_sales"
+        | "bird_sales"
+        | "manure_sales"
+        | "other_income"
+        | "feed"
+        | "medicine"
+        | "vaccines"
+        | "utilities"
+        | "repairs"
+        | "transport"
+        | "salaries"
+        | "equipment"
+        | "other_expense"
+        | "mortality_loss"
+        | "theft"
+        | "damage"
+        | "other_loss"
+      transaction_kind: "income" | "expense" | "loss"
       worker_role:
         | "caretaker"
         | "manager"
@@ -638,6 +718,26 @@ export const Constants = {
         "accountant",
         "worker",
       ],
+      transaction_category: [
+        "egg_sales",
+        "bird_sales",
+        "manure_sales",
+        "other_income",
+        "feed",
+        "medicine",
+        "vaccines",
+        "utilities",
+        "repairs",
+        "transport",
+        "salaries",
+        "equipment",
+        "other_expense",
+        "mortality_loss",
+        "theft",
+        "damage",
+        "other_loss",
+      ],
+      transaction_kind: ["income", "expense", "loss"],
       worker_role: [
         "caretaker",
         "manager",

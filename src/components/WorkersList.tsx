@@ -208,8 +208,8 @@ const WorkersList = ({ workers, loading, onRefresh }: WorkersListProps) => {
         </Select>
       </div>
 
-      <div className="rounded-lg border">
-        <Table>
+      <div className="rounded-lg border overflow-x-auto">
+        <Table className="min-w-[900px]">
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>

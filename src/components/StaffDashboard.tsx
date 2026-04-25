@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Users as UsersIcon, TrendingUp, Egg, Package, Briefcase } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader2, Users as UsersIcon, TrendingUp, Egg, Package, Briefcase, Wallet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { Database } from "@/integrations/supabase/types";
 import StaffDirectory from "./StaffDirectory";
+import FarmFinances from "./finance/FarmFinances";
 import { formatRole } from "@/lib/format";
 import type { FarmRole } from "@/hooks/use-farm-role";
 
@@ -82,22 +84,37 @@ const StaffDashboard = ({ userId, role }: StaffDashboardProps) => {
 
   return (
     <div className="space-y-6 animate-slide-up">
-      <div className="rounded-2xl bg-gradient-to-br from-primary/10 via-secondary/5 to-background border p-6">
-        <h2 className="text-3xl font-bold mb-1">{titles[role] ?? "Staff Dashboard"}</h2>
-        <p className="text-muted-foreground">{farm.name} · {farm.location_district}</p>
+      <div className="rounded-2xl bg-gradient-to-br from-primary/10 via-secondary/5 to-background border p-4 sm:p-6">
+        <h2 className="text-2xl sm:text-3xl font-bold mb-1">{titles[role] ?? "Staff Dashboard"}</h2>
+        <p className="text-sm sm:text-base text-muted-foreground">{farm.name} · {farm.location_district}</p>
         <Badge className="capitalize bg-primary/15 text-primary hover:bg-primary/20 mt-3">
           <Briefcase className="w-3 h-3 mr-1" /> {formatRole(worker.role)}
         </Badge>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         <Stat icon={UsersIcon} label="Active Workers" value={`${stats.active} / ${stats.total}`} />
         <Stat icon={Egg} label="Trays this month" value={stats.monthTrays.toLocaleString()} />
         <Stat icon={Package} label="Feed kg this month" value={stats.monthFeedKg.toLocaleString()} />
         <Stat icon={TrendingUp} label="Farm Capacity" value={(farm.bird_capacity ?? 0).toLocaleString()} />
       </div>
 
-      <StaffDirectory farmId={farm.id} viewerRole={role} />
+      <Tabs defaultValue="team" className="w-full">
+        <TabsList className="grid grid-cols-2 w-full sm:w-auto sm:inline-flex">
+          <TabsTrigger value="team">
+            <UsersIcon className="w-4 h-4 mr-1.5" /> Team
+          </TabsTrigger>
+          <TabsTrigger value="finances">
+            <Wallet className="w-4 h-4 mr-1.5" /> Finances
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="team" className="mt-4 sm:mt-6">
+          <StaffDirectory farmId={farm.id} viewerRole={role} />
+        </TabsContent>
+        <TabsContent value="finances" className="mt-4 sm:mt-6">
+          <FarmFinances farmId={farm.id} userId={userId} canDelete={false} canAdd={true} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

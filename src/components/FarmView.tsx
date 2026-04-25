@@ -9,6 +9,7 @@ import type { Database } from "@/integrations/supabase/types";
 import CreateWorkerDialog from "./CreateWorkerDialog";
 import WorkersList from "./WorkersList";
 import StaffDirectory from "./StaffDirectory";
+import FarmFinances from "./finance/FarmFinances";
 
 type Farm = Database["public"]["Tables"]["farms"]["Row"];
 type Worker = Database["public"]["Tables"]["workers"]["Row"];
@@ -22,11 +23,38 @@ const FarmView = ({ farm, onBack }: FarmViewProps) => {
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(true);
   const [createWorkerOpen, setCreateWorkerOpen] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [monthNet, setMonthNet] = useState<number | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+  }, []);
+
+  useEffect(() => {
     fetchWorkers();
+    fetchMonthFinance();
   }, [farm.id]);
+
+  const fetchMonthFinance = async () => {
+    const start = new Date();
+    start.setDate(1);
+    start.setHours(0, 0, 0, 0);
+    const startISO = start.toISOString().slice(0, 10);
+    const { data } = await supabase
+      .from("farm_transactions")
+      .select("kind, amount")
+      .eq("farm_id", farm.id)
+      .gte("date", startISO);
+    if (data) {
+      const net = data.reduce((sum, t) => {
+        const a = Number(t.amount);
+        if (t.kind === "income") return sum + a;
+        return sum - a;
+      }, 0);
+      setMonthNet(net);
+    }
+  };
 
   const fetchWorkers = async () => {
     try {
@@ -59,31 +87,37 @@ const FarmView = ({ farm, onBack }: FarmViewProps) => {
     maximumFractionDigits: 0,
   }).format(totalPayroll);
 
+  const formattedNet = monthNet === null ? "—" : new Intl.NumberFormat("en-UG", {
+    style: "currency",
+    currency: "UGX",
+    maximumFractionDigits: 0,
+  }).format(monthNet);
+
   const quickStats = [
     { label: "Active Workers", value: `${activeCount} / ${workers.length}`, icon: Users, color: "from-primary to-primary/80" },
     { label: "Monthly Payroll", value: formattedPayroll, icon: Wallet, color: "from-secondary to-secondary/80" },
-    { label: "Reports", value: "0", icon: BarChart3, color: "from-accent to-accent/80" },
+    { label: "Net Profit (this month)", value: formattedNet, icon: BarChart3, color: monthNet !== null && monthNet < 0 ? "from-destructive to-destructive/80" : "from-accent to-accent/80" },
   ];
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
+      <div className="flex items-start gap-3 sm:gap-4">
         <Button
           variant="ghost"
           size="icon"
           onClick={onBack}
-          className="rounded-xl"
+          className="rounded-xl shrink-0"
         >
           <ArrowLeft className="w-5 h-5" />
         </Button>
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
-              <Sprout className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shrink-0">
+              <Sprout className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
-            <div>
-              <h1 className="text-3xl font-bold">{farm.name}</h1>
-              <p className="text-muted-foreground">
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-3xl font-bold truncate">{farm.name}</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground truncate">
                 {farm.location_district} • {farm.farm_type.replace("_", " ")}
               </p>
             </div>
@@ -92,57 +126,80 @@ const FarmView = ({ farm, onBack }: FarmViewProps) => {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         {quickStats.map((stat, index) => (
           <Card
             key={index}
             className="border-border/50 hover:border-primary/50 transition-all hover:shadow-lg"
           >
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-2">
-                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center`}>
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-2 gap-2">
+                <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center shrink-0`}>
                   <stat.icon className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-xl font-bold">{stat.value}</span>
+                <span className="text-base sm:text-xl font-bold text-right break-words">{stat.value}</span>
               </div>
-              <p className="text-sm text-muted-foreground">{stat.label}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">{stat.label}</p>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Workers Section with tabs */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <div>
-              <CardTitle className="text-2xl">Farm Workers</CardTitle>
-              <CardDescription>Manage your team and view the employee directory</CardDescription>
-            </div>
-            <Button
-              onClick={() => setCreateWorkerOpen(true)}
-              className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-white font-semibold rounded-xl shadow-lg"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              Add Worker
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="manage">
-            <TabsList>
-              <TabsTrigger value="manage">Management</TabsTrigger>
-              <TabsTrigger value="directory">Employee Directory</TabsTrigger>
-            </TabsList>
-            <TabsContent value="manage" className="mt-4">
-              <WorkersList workers={workers} loading={loading} onRefresh={fetchWorkers} />
-            </TabsContent>
-            <TabsContent value="directory" className="mt-4">
-              <StaffDirectory farmId={farm.id} viewerRole="owner" />
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+      {/* Top-level tabs: Workers + Finances */}
+      <Tabs defaultValue="workers" className="w-full">
+        <TabsList className="grid grid-cols-2 w-full sm:w-auto sm:inline-flex">
+          <TabsTrigger value="workers">
+            <Users className="w-4 h-4 mr-1.5" /> Workers
+          </TabsTrigger>
+          <TabsTrigger value="finances">
+            <Wallet className="w-4 h-4 mr-1.5" /> Finances
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="workers" className="mt-4 sm:mt-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div>
+                  <CardTitle className="text-xl sm:text-2xl">Farm Workers</CardTitle>
+                  <CardDescription>Manage your team and view the employee directory</CardDescription>
+                </div>
+                <Button
+                  onClick={() => setCreateWorkerOpen(true)}
+                  className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-white font-semibold rounded-xl shadow-lg w-full sm:w-auto"
+                >
+                  <Plus className="w-5 h-5 mr-2" />
+                  Add Worker
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="manage">
+                <TabsList className="grid grid-cols-2 w-full sm:w-auto sm:inline-flex">
+                  <TabsTrigger value="manage">Management</TabsTrigger>
+                  <TabsTrigger value="directory">Directory</TabsTrigger>
+                </TabsList>
+                <TabsContent value="manage" className="mt-4">
+                  <WorkersList workers={workers} loading={loading} onRefresh={fetchWorkers} />
+                </TabsContent>
+                <TabsContent value="directory" className="mt-4">
+                  <StaffDirectory farmId={farm.id} viewerRole="owner" />
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="finances" className="mt-4 sm:mt-6">
+          {userId ? (
+            <FarmFinances farmId={farm.id} userId={userId} canDelete={true} />
+          ) : (
+            <Card>
+              <CardContent className="py-8 text-center text-muted-foreground">Loading finances...</CardContent>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
 
       <CreateWorkerDialog
         open={createWorkerOpen}
