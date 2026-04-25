@@ -104,11 +104,20 @@ const Dashboard = () => {
     );
   }
 
+  const isDualRoleManager = workerRole === "manager" && isAlsoAccountant;
+
   // Decide which dashboard to render for staff/worker users
   const renderStaffOrWorkerView = () => {
     if (!user) return null;
     if (workerRole === "worker") return <WorkerDashboard userId={user.id} />;
     if (workerRole === "accountant") return <AccountantDashboard userId={user.id} />;
+    if (isDualRoleManager) {
+      return dualView === "accountant" ? (
+        <AccountantDashboard userId={user.id} />
+      ) : (
+        <StaffDashboard userId={user.id} role="manager" />
+      );
+    }
     if (workerRole === "manager" || workerRole === "assistant_manager" || workerRole === "caretaker") {
       return <StaffDashboard userId={user.id} role={workerRole} />;
     }
