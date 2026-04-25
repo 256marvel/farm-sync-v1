@@ -142,7 +142,7 @@ const WorkerDashboard = ({ userId }: WorkerDashboardProps) => {
           <CardDescription>Log your daily farm operations</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3">
             <ActionButton icon={Egg} label="Egg Production" onClick={() => setEggDialogOpen(true)} />
             <ActionButton icon={Package} label="Feed Usage" onClick={() => setFeedDialogOpen(true)} />
             <ActionButton icon={AlertTriangle} label="Mortality" onClick={() => setMortalityDialogOpen(true)} />
