@@ -36,7 +36,7 @@ const Dashboard = () => {
     const checkUserRole = async (userId: string) => {
       const { data: workerData } = await supabase
         .from("workers")
-        .select("id, is_active, role")
+        .select("id, is_active, role, is_also_accountant")
         .eq("user_id", userId)
         .maybeSingle();
 
@@ -53,6 +53,7 @@ const Dashboard = () => {
 
       setIsWorker(!!workerData);
       setWorkerRole((workerData?.role as WorkerRole) ?? null);
+      setIsAlsoAccountant(!!workerData?.is_also_accountant);
     };
 
     supabase.auth.getSession().then(({ data: { session } }) => {
