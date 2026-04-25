@@ -80,6 +80,7 @@ serve(async (req) => {
       houseAssignment,
       dateOfBirth,
       contactAddress,
+      isAlsoAccountant,
       nextOfKinName,
       nextOfKinRelationship,
       nextOfKinPhone,
