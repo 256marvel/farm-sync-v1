@@ -112,6 +112,7 @@ const EditWorkerDialog = ({ open, onOpenChange, worker, onSuccess }: EditWorkerD
           nin: values.nin || null,
           monthly_salary: values.monthly_salary ? Number(values.monthly_salary) : null,
           house_assignment: values.house_assignment || null,
+          is_also_accountant: values.role === "manager" ? !!values.is_also_accountant : false,
           next_of_kin_name: values.next_of_kin_name,
           next_of_kin_relationship: values.next_of_kin_relationship,
           next_of_kin_phone: values.next_of_kin_phone,
