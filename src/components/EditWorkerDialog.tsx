@@ -324,6 +324,32 @@ const EditWorkerDialog = ({ open, onOpenChange, worker, onSuccess }: EditWorkerD
                   )}
                 />
               </div>
+
+              {form.watch("role") === "manager" && (
+                <FormField
+                  control={form.control}
+                  name="is_also_accountant"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start gap-3 rounded-lg border bg-accent/30 p-4 mt-4">
+                      <FormControl>
+                        <Checkbox
+                          checked={!!field.value}
+                          onCheckedChange={field.onChange}
+                          className="mt-0.5"
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel className="cursor-pointer">
+                          Also appoint as Accountant
+                        </FormLabel>
+                        <p className="text-xs text-muted-foreground">
+                          Manager will be able to switch between Manager and Accountant dashboards.
+                        </p>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              )}
             </div>
 
             <div className="border-t pt-6">
