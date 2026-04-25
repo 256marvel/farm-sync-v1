@@ -226,6 +226,113 @@ export type Database = {
           },
         ]
       }
+      inventory_items: {
+        Row: {
+          category: Database["public"]["Enums"]["inventory_category"]
+          created_at: string
+          current_quantity: number
+          farm_id: string
+          id: string
+          is_active: boolean
+          low_stock_threshold: number
+          name: string
+          notes: string | null
+          unit: string
+          unit_cost: number | null
+          updated_at: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["inventory_category"]
+          created_at?: string
+          current_quantity?: number
+          farm_id: string
+          id?: string
+          is_active?: boolean
+          low_stock_threshold?: number
+          name: string
+          notes?: string | null
+          unit?: string
+          unit_cost?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["inventory_category"]
+          created_at?: string
+          current_quantity?: number
+          farm_id?: string
+          id?: string
+          is_active?: boolean
+          low_stock_threshold?: number
+          name?: string
+          notes?: string | null
+          unit?: string
+          unit_cost?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_items_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "farms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory_movements: {
+        Row: {
+          created_at: string
+          date: string
+          farm_id: string
+          id: string
+          item_id: string
+          movement_type: Database["public"]["Enums"]["inventory_movement_type"]
+          notes: string | null
+          quantity: number
+          recorded_by: string
+          unit_cost: number | null
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          farm_id: string
+          id?: string
+          item_id: string
+          movement_type: Database["public"]["Enums"]["inventory_movement_type"]
+          notes?: string | null
+          quantity: number
+          recorded_by: string
+          unit_cost?: number | null
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          farm_id?: string
+          id?: string
+          item_id?: string
+          movement_type?: Database["public"]["Enums"]["inventory_movement_type"]
+          notes?: string | null
+          quantity?: number
+          recorded_by?: string
+          unit_cost?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_movements_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "farms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_movements_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mortality: {
         Row: {
           age_weeks: number
@@ -448,6 +555,7 @@ export type Database = {
           house_assignment: string | null
           id: string
           is_active: boolean | null
+          is_also_accountant: boolean
           manager_id: string | null
           monthly_salary: number | null
           next_of_kin_name: string
@@ -472,6 +580,7 @@ export type Database = {
           house_assignment?: string | null
           id?: string
           is_active?: boolean | null
+          is_also_accountant?: boolean
           manager_id?: string | null
           monthly_salary?: number | null
           next_of_kin_name: string
@@ -496,6 +605,7 @@ export type Database = {
           house_assignment?: string | null
           id?: string
           is_active?: boolean | null
+          is_also_accountant?: boolean
           manager_id?: string | null
           monthly_salary?: number | null
           next_of_kin_name?: string
@@ -558,6 +668,13 @@ export type Database = {
         | "assistant_manager"
         | "accountant"
         | "worker"
+      inventory_category:
+        | "feed"
+        | "vaccine"
+        | "medicine"
+        | "equipment"
+        | "other"
+      inventory_movement_type: "received" | "used" | "adjusted" | "lost"
       transaction_category:
         | "egg_sales"
         | "bird_sales"
@@ -718,6 +835,8 @@ export const Constants = {
         "accountant",
         "worker",
       ],
+      inventory_category: ["feed", "vaccine", "medicine", "equipment", "other"],
+      inventory_movement_type: ["received", "used", "adjusted", "lost"],
       transaction_category: [
         "egg_sales",
         "bird_sales",

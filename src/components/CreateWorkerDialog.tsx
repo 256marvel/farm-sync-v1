@@ -11,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Copy, Check } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
   full_name: z.string().min(2, "Name must be at least 2 characters"),
@@ -23,6 +24,7 @@ const formSchema = z.object({
   nin: z.string().optional(),
   monthly_salary: z.string().optional(),
   house_assignment: z.string().optional(),
+  is_also_accountant: z.boolean().optional(),
   next_of_kin_name: z.string().min(2, "Next of kin name is required"),
   next_of_kin_relationship: z.enum(["parent", "sibling", "spouse", "child", "relative", "friend"]),
   next_of_kin_phone: z.string().min(10, "Valid phone number is required"),
@@ -63,6 +65,7 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
       nin: "",
       monthly_salary: "",
       house_assignment: "",
+      is_also_accountant: false,
       next_of_kin_name: "",
       next_of_kin_relationship: "parent",
       next_of_kin_phone: "",
@@ -128,6 +131,7 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
           nin: values.nin || null,
           monthlySalary: values.monthly_salary ? Number(values.monthly_salary) : null,
           houseAssignment: values.house_assignment || null,
+          isAlsoAccountant: values.role === "manager" ? !!values.is_also_accountant : false,
           nextOfKinName: values.next_of_kin_name,
           nextOfKinRelationship: values.next_of_kin_relationship,
           nextOfKinPhone: values.next_of_kin_phone,
@@ -422,6 +426,33 @@ const CreateWorkerDialog = ({ open, onOpenChange, farmId, onSuccess }: CreateWor
                   )}
                 />
               </div>
+
+              {form.watch("role") === "manager" && (
+                <FormField
+                  control={form.control}
+                  name="is_also_accountant"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start gap-3 rounded-lg border bg-accent/30 p-4 mt-4">
+                      <FormControl>
+                        <Checkbox
+                          checked={!!field.value}
+                          onCheckedChange={field.onChange}
+                          className="mt-0.5"
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel className="cursor-pointer">
+                          Also appoint as Accountant
+                        </FormLabel>
+                        <p className="text-xs text-muted-foreground">
+                          Useful when the farm has no dedicated accountant. The manager
+                          will be able to switch between Manager and Accountant dashboards.
+                        </p>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              )}
             </div>
 
             <div className="border-t pt-6">

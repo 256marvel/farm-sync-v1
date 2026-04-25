@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Sprout, LogOut, Settings } from "lucide-react";
+import { Sprout, LogOut, Settings, Briefcase, Wallet } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import FarmSelector from "@/components/FarmSelector";
@@ -16,6 +16,7 @@ import AccountantDashboard from "@/components/AccountantDashboard";
 
 type Farm = Database["public"]["Tables"]["farms"]["Row"];
 type WorkerRole = Database["public"]["Enums"]["worker_role"];
+type DualView = "manager" | "accountant";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -28,12 +29,14 @@ const Dashboard = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [workerRole, setWorkerRole] = useState<WorkerRole | null>(null);
   const [isWorker, setIsWorker] = useState(false);
+  const [isAlsoAccountant, setIsAlsoAccountant] = useState(false);
+  const [dualView, setDualView] = useState<DualView>("manager");
 
   useEffect(() => {
     const checkUserRole = async (userId: string) => {
       const { data: workerData } = await supabase
         .from("workers")
-        .select("id, is_active, role")
+        .select("id, is_active, role, is_also_accountant")
         .eq("user_id", userId)
         .maybeSingle();
 
@@ -50,6 +53,7 @@ const Dashboard = () => {
 
       setIsWorker(!!workerData);
       setWorkerRole((workerData?.role as WorkerRole) ?? null);
+      setIsAlsoAccountant(!!workerData?.is_also_accountant);
     };
 
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -100,11 +104,20 @@ const Dashboard = () => {
     );
   }
 
+  const isDualRoleManager = workerRole === "manager" && isAlsoAccountant;
+
   // Decide which dashboard to render for staff/worker users
   const renderStaffOrWorkerView = () => {
     if (!user) return null;
     if (workerRole === "worker") return <WorkerDashboard userId={user.id} />;
     if (workerRole === "accountant") return <AccountantDashboard userId={user.id} />;
+    if (isDualRoleManager) {
+      return dualView === "accountant" ? (
+        <AccountantDashboard userId={user.id} />
+      ) : (
+        <StaffDashboard userId={user.id} role="manager" />
+      );
+    }
     if (workerRole === "manager" || workerRole === "assistant_manager" || workerRole === "caretaker") {
       return <StaffDashboard userId={user.id} role={workerRole} />;
     }
@@ -129,6 +142,36 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+              {isDualRoleManager && (
+                <div className="hidden xs:inline-flex sm:inline-flex items-center rounded-full border bg-muted/50 p-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setDualView("manager")}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
+                      dualView === "manager"
+                        ? "bg-primary text-primary-foreground shadow"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                    aria-pressed={dualView === "manager"}
+                  >
+                    <Briefcase className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Manager</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDualView("accountant")}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
+                      dualView === "accountant"
+                        ? "bg-primary text-primary-foreground shadow"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                    aria-pressed={dualView === "accountant"}
+                  >
+                    <Wallet className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Accountant</span>
+                  </button>
+                </div>
+              )}
               <Button variant="ghost" size="icon" onClick={() => setSettingsOpen(true)}>
                 <Settings className="w-5 h-5" />
               </Button>

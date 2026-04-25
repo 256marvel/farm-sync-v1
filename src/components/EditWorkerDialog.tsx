@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import type { Database } from "@/integrations/supabase/types";
 
 type Worker = Database["public"]["Tables"]["workers"]["Row"];
@@ -26,6 +27,7 @@ const formSchema = z.object({
   nin: z.string().optional(),
   monthly_salary: z.string().optional(),
   house_assignment: z.string().optional(),
+  is_also_accountant: z.boolean().optional(),
   next_of_kin_name: z.string().min(2, "Next of kin name is required"),
   next_of_kin_relationship: z.enum(["parent", "sibling", "spouse", "child", "relative", "friend"]),
   next_of_kin_phone: z.string().min(10, "Valid phone number is required"),
@@ -64,6 +66,7 @@ const EditWorkerDialog = ({ open, onOpenChange, worker, onSuccess }: EditWorkerD
       nin: "",
       monthly_salary: "",
       house_assignment: "",
+      is_also_accountant: false,
       next_of_kin_name: "",
       next_of_kin_relationship: "parent",
       next_of_kin_phone: "",
@@ -83,6 +86,7 @@ const EditWorkerDialog = ({ open, onOpenChange, worker, onSuccess }: EditWorkerD
         nin: worker.nin || "",
         monthly_salary: worker.monthly_salary != null ? String(worker.monthly_salary) : "",
         house_assignment: worker.house_assignment || "",
+        is_also_accountant: !!(worker as any).is_also_accountant,
         next_of_kin_name: worker.next_of_kin_name,
         next_of_kin_relationship: worker.next_of_kin_relationship as any,
         next_of_kin_phone: worker.next_of_kin_phone,
@@ -108,6 +112,7 @@ const EditWorkerDialog = ({ open, onOpenChange, worker, onSuccess }: EditWorkerD
           nin: values.nin || null,
           monthly_salary: values.monthly_salary ? Number(values.monthly_salary) : null,
           house_assignment: values.house_assignment || null,
+          is_also_accountant: values.role === "manager" ? !!values.is_also_accountant : false,
           next_of_kin_name: values.next_of_kin_name,
           next_of_kin_relationship: values.next_of_kin_relationship,
           next_of_kin_phone: values.next_of_kin_phone,
@@ -319,6 +324,32 @@ const EditWorkerDialog = ({ open, onOpenChange, worker, onSuccess }: EditWorkerD
                   )}
                 />
               </div>
+
+              {form.watch("role") === "manager" && (
+                <FormField
+                  control={form.control}
+                  name="is_also_accountant"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start gap-3 rounded-lg border bg-accent/30 p-4 mt-4">
+                      <FormControl>
+                        <Checkbox
+                          checked={!!field.value}
+                          onCheckedChange={field.onChange}
+                          className="mt-0.5"
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel className="cursor-pointer">
+                          Also appoint as Accountant
+                        </FormLabel>
+                        <p className="text-xs text-muted-foreground">
+                          Manager will be able to switch between Manager and Accountant dashboards.
+                        </p>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              )}
             </div>
 
             <div className="border-t pt-6">
