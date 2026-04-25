@@ -142,6 +142,36 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+              {isDualRoleManager && (
+                <div className="hidden xs:inline-flex sm:inline-flex items-center rounded-full border bg-muted/50 p-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setDualView("manager")}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
+                      dualView === "manager"
+                        ? "bg-primary text-primary-foreground shadow"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                    aria-pressed={dualView === "manager"}
+                  >
+                    <Briefcase className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Manager</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDualView("accountant")}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
+                      dualView === "accountant"
+                        ? "bg-primary text-primary-foreground shadow"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                    aria-pressed={dualView === "accountant"}
+                  >
+                    <Wallet className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Accountant</span>
+                  </button>
+                </div>
+              )}
               <Button variant="ghost" size="icon" onClick={() => setSettingsOpen(true)}>
                 <Settings className="w-5 h-5" />
               </Button>
