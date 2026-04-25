@@ -24,6 +24,7 @@ const FarmView = ({ farm, onBack }: FarmViewProps) => {
   const [loading, setLoading] = useState(true);
   const [createWorkerOpen, setCreateWorkerOpen] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [monthNet, setMonthNet] = useState<number | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -32,7 +33,28 @@ const FarmView = ({ farm, onBack }: FarmViewProps) => {
 
   useEffect(() => {
     fetchWorkers();
+    fetchMonthFinance();
   }, [farm.id]);
+
+  const fetchMonthFinance = async () => {
+    const start = new Date();
+    start.setDate(1);
+    start.setHours(0, 0, 0, 0);
+    const startISO = start.toISOString().slice(0, 10);
+    const { data } = await supabase
+      .from("farm_transactions")
+      .select("kind, amount")
+      .eq("farm_id", farm.id)
+      .gte("date", startISO);
+    if (data) {
+      const net = data.reduce((sum, t) => {
+        const a = Number(t.amount);
+        if (t.kind === "income") return sum + a;
+        return sum - a;
+      }, 0);
+      setMonthNet(net);
+    }
+  };
 
   const fetchWorkers = async () => {
     try {
