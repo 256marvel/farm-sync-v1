@@ -86,6 +86,7 @@ const EditWorkerDialog = ({ open, onOpenChange, worker, onSuccess }: EditWorkerD
         nin: worker.nin || "",
         monthly_salary: worker.monthly_salary != null ? String(worker.monthly_salary) : "",
         house_assignment: worker.house_assignment || "",
+        is_also_accountant: !!(worker as any).is_also_accountant,
         next_of_kin_name: worker.next_of_kin_name,
         next_of_kin_relationship: worker.next_of_kin_relationship as any,
         next_of_kin_phone: worker.next_of_kin_phone,
