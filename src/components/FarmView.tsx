@@ -87,10 +87,16 @@ const FarmView = ({ farm, onBack }: FarmViewProps) => {
     maximumFractionDigits: 0,
   }).format(totalPayroll);
 
+  const formattedNet = monthNet === null ? "—" : new Intl.NumberFormat("en-UG", {
+    style: "currency",
+    currency: "UGX",
+    maximumFractionDigits: 0,
+  }).format(monthNet);
+
   const quickStats = [
     { label: "Active Workers", value: `${activeCount} / ${workers.length}`, icon: Users, color: "from-primary to-primary/80" },
     { label: "Monthly Payroll", value: formattedPayroll, icon: Wallet, color: "from-secondary to-secondary/80" },
-    { label: "Reports", value: "0", icon: BarChart3, color: "from-accent to-accent/80" },
+    { label: "Net Profit (this month)", value: formattedNet, icon: BarChart3, color: monthNet !== null && monthNet < 0 ? "from-destructive to-destructive/80" : "from-accent to-accent/80" },
   ];
 
   return (
