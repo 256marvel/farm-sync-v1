@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Sprout, LogOut, Settings } from "lucide-react";
+import { Sprout, LogOut, Settings, Briefcase, Wallet } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import FarmSelector from "@/components/FarmSelector";
@@ -16,6 +16,7 @@ import AccountantDashboard from "@/components/AccountantDashboard";
 
 type Farm = Database["public"]["Tables"]["farms"]["Row"];
 type WorkerRole = Database["public"]["Enums"]["worker_role"];
+type DualView = "manager" | "accountant";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -28,6 +29,8 @@ const Dashboard = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [workerRole, setWorkerRole] = useState<WorkerRole | null>(null);
   const [isWorker, setIsWorker] = useState(false);
+  const [isAlsoAccountant, setIsAlsoAccountant] = useState(false);
+  const [dualView, setDualView] = useState<DualView>("manager");
 
   useEffect(() => {
     const checkUserRole = async (userId: string) => {
