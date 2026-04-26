@@ -3,13 +3,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Users as UsersIcon, TrendingUp, Egg, Package, Briefcase, Wallet, Sparkles } from "lucide-react";
+import { Loader2, Users as UsersIcon, TrendingUp, Egg, Package, Briefcase, Wallet, Sparkles, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { Database } from "@/integrations/supabase/types";
 import StaffDirectory from "./StaffDirectory";
 import FarmFinances from "./finance/FarmFinances";
 import FarmInventory from "./inventory/FarmInventory";
 import FarmInsights from "./insights/FarmInsights";
+import FarmDailyReports from "./staff/FarmDailyReports";
 import { formatRole } from "@/lib/format";
 import type { FarmRole } from "@/hooks/use-farm-role";
 
