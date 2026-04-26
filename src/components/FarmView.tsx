@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Users, Plus, TrendingUp, BarChart3, Sprout, Wallet, Package, Sparkles } from "lucide-react";
+import { ArrowLeft, Users, Plus, TrendingUp, BarChart3, Sprout, Wallet, Package, Sparkles, FileText } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 import CreateWorkerDialog from "./CreateWorkerDialog";
 import WorkersList from "./WorkersList";
@@ -12,6 +12,7 @@ import StaffDirectory from "./StaffDirectory";
 import FarmFinances from "./finance/FarmFinances";
 import FarmInventory from "./inventory/FarmInventory";
 import FarmInsights from "./insights/FarmInsights";
+import FarmDailyReports from "./staff/FarmDailyReports";
 
 type Farm = Database["public"]["Tables"]["farms"]["Row"];
 type Worker = Database["public"]["Tables"]["workers"]["Row"];
@@ -149,9 +150,12 @@ const FarmView = ({ farm, onBack }: FarmViewProps) => {
 
       {/* Top-level tabs */}
       <Tabs defaultValue="workers" className="w-full">
-        <TabsList className="grid grid-cols-2 sm:grid-cols-4 w-full sm:w-auto sm:inline-flex gap-1">
+        <TabsList className="grid grid-cols-3 sm:grid-cols-5 w-full sm:w-auto sm:inline-flex gap-1">
           <TabsTrigger value="workers">
             <Users className="w-4 h-4 mr-1.5" /> Workers
+          </TabsTrigger>
+          <TabsTrigger value="reports">
+            <FileText className="w-4 h-4 mr-1.5" /> Reports
           </TabsTrigger>
           <TabsTrigger value="finances">
             <Wallet className="w-4 h-4 mr-1.5" /> Finances
@@ -160,7 +164,7 @@ const FarmView = ({ farm, onBack }: FarmViewProps) => {
             <Package className="w-4 h-4 mr-1.5" /> Inventory
           </TabsTrigger>
           <TabsTrigger value="insights">
-            <Sparkles className="w-4 h-4 mr-1.5" /> AI Insights
+            <Sparkles className="w-4 h-4 mr-1.5" /> AI
           </TabsTrigger>
         </TabsList>
 
@@ -196,6 +200,10 @@ const FarmView = ({ farm, onBack }: FarmViewProps) => {
               </Tabs>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="reports" className="mt-4 sm:mt-6">
+          <FarmDailyReports farmId={farm.id} />
         </TabsContent>
 
         <TabsContent value="finances" className="mt-4 sm:mt-6">

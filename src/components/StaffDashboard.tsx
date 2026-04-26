@@ -3,13 +3,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Users as UsersIcon, TrendingUp, Egg, Package, Briefcase, Wallet, Sparkles } from "lucide-react";
+import { Loader2, Users as UsersIcon, TrendingUp, Egg, Package, Briefcase, Wallet, Sparkles, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { Database } from "@/integrations/supabase/types";
 import StaffDirectory from "./StaffDirectory";
 import FarmFinances from "./finance/FarmFinances";
 import FarmInventory from "./inventory/FarmInventory";
 import FarmInsights from "./insights/FarmInsights";
+import FarmDailyReports from "./staff/FarmDailyReports";
 import { formatRole } from "@/lib/format";
 import type { FarmRole } from "@/hooks/use-farm-role";
 
@@ -101,8 +102,11 @@ const StaffDashboard = ({ userId, role }: StaffDashboardProps) => {
         <Stat icon={TrendingUp} label="Farm Capacity" value={(farm.bird_capacity ?? 0).toLocaleString()} />
       </div>
 
-      <Tabs defaultValue="team" className="w-full">
-        <TabsList className="grid grid-cols-2 sm:grid-cols-4 w-full sm:w-auto sm:inline-flex gap-1">
+      <Tabs defaultValue="reports" className="w-full">
+        <TabsList className="grid grid-cols-3 sm:grid-cols-5 w-full sm:w-auto sm:inline-flex gap-1">
+          <TabsTrigger value="reports">
+            <FileText className="w-4 h-4 mr-1.5" /> Reports
+          </TabsTrigger>
           <TabsTrigger value="team">
             <UsersIcon className="w-4 h-4 mr-1.5" /> Team
           </TabsTrigger>
@@ -116,6 +120,9 @@ const StaffDashboard = ({ userId, role }: StaffDashboardProps) => {
             <Sparkles className="w-4 h-4 mr-1.5" /> AI
           </TabsTrigger>
         </TabsList>
+        <TabsContent value="reports" className="mt-4 sm:mt-6">
+          <FarmDailyReports farmId={farm.id} />
+        </TabsContent>
         <TabsContent value="team" className="mt-4 sm:mt-6">
           <StaffDirectory farmId={farm.id} viewerRole={role} />
         </TabsContent>
