@@ -4,12 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Users, Plus, TrendingUp, BarChart3, Sprout, Wallet } from "lucide-react";
+import { ArrowLeft, Users, Plus, TrendingUp, BarChart3, Sprout, Wallet, Package, Sparkles } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 import CreateWorkerDialog from "./CreateWorkerDialog";
 import WorkersList from "./WorkersList";
 import StaffDirectory from "./StaffDirectory";
 import FarmFinances from "./finance/FarmFinances";
+import FarmInventory from "./inventory/FarmInventory";
+import FarmInsights from "./insights/FarmInsights";
 
 type Farm = Database["public"]["Tables"]["farms"]["Row"];
 type Worker = Database["public"]["Tables"]["workers"]["Row"];
@@ -145,14 +147,20 @@ const FarmView = ({ farm, onBack }: FarmViewProps) => {
         ))}
       </div>
 
-      {/* Top-level tabs: Workers + Finances */}
+      {/* Top-level tabs */}
       <Tabs defaultValue="workers" className="w-full">
-        <TabsList className="grid grid-cols-2 w-full sm:w-auto sm:inline-flex">
+        <TabsList className="grid grid-cols-2 sm:grid-cols-4 w-full sm:w-auto sm:inline-flex gap-1">
           <TabsTrigger value="workers">
             <Users className="w-4 h-4 mr-1.5" /> Workers
           </TabsTrigger>
           <TabsTrigger value="finances">
             <Wallet className="w-4 h-4 mr-1.5" /> Finances
+          </TabsTrigger>
+          <TabsTrigger value="inventory">
+            <Package className="w-4 h-4 mr-1.5" /> Inventory
+          </TabsTrigger>
+          <TabsTrigger value="insights">
+            <Sparkles className="w-4 h-4 mr-1.5" /> AI Insights
           </TabsTrigger>
         </TabsList>
 
@@ -198,6 +206,20 @@ const FarmView = ({ farm, onBack }: FarmViewProps) => {
               <CardContent className="py-8 text-center text-muted-foreground">Loading finances...</CardContent>
             </Card>
           )}
+        </TabsContent>
+
+        <TabsContent value="inventory" className="mt-4 sm:mt-6">
+          {userId ? (
+            <FarmInventory farmId={farm.id} userId={userId} canManage={true} />
+          ) : (
+            <Card>
+              <CardContent className="py-8 text-center text-muted-foreground">Loading inventory...</CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="insights" className="mt-4 sm:mt-6">
+          <FarmInsights farmId={farm.id} />
         </TabsContent>
       </Tabs>
 
