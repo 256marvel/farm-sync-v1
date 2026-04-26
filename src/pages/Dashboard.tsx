@@ -13,6 +13,7 @@ import SettingsDialog from "@/components/SettingsDialog";
 import WorkerDashboard from "@/components/WorkerDashboard";
 import StaffDashboard from "@/components/StaffDashboard";
 import AccountantDashboard from "@/components/AccountantDashboard";
+import OfflineSyncIndicator from "@/components/OfflineSyncIndicator";
 
 type Farm = Database["public"]["Tables"]["farms"]["Row"];
 type WorkerRole = Database["public"]["Enums"]["worker_role"];
@@ -142,6 +143,7 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+              <OfflineSyncIndicator />
               {isDualRoleManager && (
                 <div className="hidden xs:inline-flex sm:inline-flex items-center rounded-full border bg-muted/50 p-0.5">
                   <button

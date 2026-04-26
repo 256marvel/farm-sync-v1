@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { enqueueOrInsert } from "@/lib/offline-queue";
 import { Loader2 } from "lucide-react";
 
 interface FeedUsageDialogProps {
@@ -31,7 +31,7 @@ export const FeedUsageDialog = ({ open, onOpenChange, workerId, farmId, onSucces
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.from("feed_usage").insert({
+      const { queued } = await enqueueOrInsert("feed_usage", {
         worker_id: workerId,
         farm_id: farmId,
         date: formData.date,
@@ -40,11 +40,11 @@ export const FeedUsageDialog = ({ open, onOpenChange, workerId, farmId, onSucces
         remaining_stock_kg: parseFloat(formData.remaining_stock_kg),
       });
 
-      if (error) throw error;
-
       toast({
-        title: "Success",
-        description: "Feed usage data recorded successfully",
+        title: queued ? "Saved offline" : "Success",
+        description: queued
+          ? "You're offline. This feed usage will sync automatically when you reconnect."
+          : "Feed usage data recorded successfully",
       });
 
       setFormData({
