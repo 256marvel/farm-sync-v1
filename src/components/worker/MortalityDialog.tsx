@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { enqueueOrInsert } from "@/lib/offline-queue";
 import { Loader2 } from "lucide-react";
 
 interface MortalityDialogProps {
@@ -31,7 +31,7 @@ export const MortalityDialog = ({ open, onOpenChange, workerId, farmId, onSucces
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.from("mortality").insert({
+      const { queued } = await enqueueOrInsert("mortality", {
         worker_id: workerId,
         farm_id: farmId,
         date: formData.date,
@@ -40,11 +40,11 @@ export const MortalityDialog = ({ open, onOpenChange, workerId, farmId, onSucces
         age_weeks: parseInt(formData.age_weeks),
       });
 
-      if (error) throw error;
-
       toast({
-        title: "Success",
-        description: "Mortality data recorded successfully",
+        title: queued ? "Saved offline" : "Success",
+        description: queued
+          ? "You're offline. This mortality report will sync automatically when you reconnect."
+          : "Mortality data recorded successfully",
       });
 
       setFormData({

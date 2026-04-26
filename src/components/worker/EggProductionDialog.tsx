@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { enqueueOrInsert } from "@/lib/offline-queue";
 import { Loader2 } from "lucide-react";
 
 interface EggProductionDialogProps {
@@ -31,7 +31,7 @@ export const EggProductionDialog = ({ open, onOpenChange, workerId, farmId, onSu
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.from("egg_production").insert({
+      const { queued } = await enqueueOrInsert("egg_production", {
         worker_id: workerId,
         farm_id: farmId,
         date: formData.date,
@@ -41,11 +41,11 @@ export const EggProductionDialog = ({ open, onOpenChange, workerId, farmId, onSu
         damaged_eggs: parseInt(formData.damaged_eggs),
       });
 
-      if (error) throw error;
-
       toast({
-        title: "Success",
-        description: "Egg production data recorded successfully",
+        title: queued ? "Saved offline" : "Success",
+        description: queued
+          ? "You're offline. This egg report will sync automatically when you reconnect."
+          : "Egg production data recorded successfully",
       });
 
       setFormData({

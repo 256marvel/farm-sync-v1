@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { enqueueOrInsert } from "@/lib/offline-queue";
 import { Loader2 } from "lucide-react";
 
 interface VaccinationDialogProps {
@@ -30,7 +30,7 @@ export const VaccinationDialog = ({ open, onOpenChange, workerId, farmId, onSucc
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.from("vaccination").insert({
+      const { queued } = await enqueueOrInsert("vaccination", {
         worker_id: workerId,
         farm_id: farmId,
         date: formData.date,
@@ -39,11 +39,11 @@ export const VaccinationDialog = ({ open, onOpenChange, workerId, farmId, onSucc
         administered_by: formData.administered_by,
       });
 
-      if (error) throw error;
-
       toast({
-        title: "Success",
-        description: "Vaccination data recorded successfully",
+        title: queued ? "Saved offline" : "Success",
+        description: queued
+          ? "You're offline. This vaccination report will sync automatically when you reconnect."
+          : "Vaccination data recorded successfully",
       });
 
       setFormData({
