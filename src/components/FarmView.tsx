@@ -150,9 +150,12 @@ const FarmView = ({ farm, onBack }: FarmViewProps) => {
 
       {/* Top-level tabs */}
       <Tabs defaultValue="workers" className="w-full">
-        <TabsList className="grid grid-cols-2 sm:grid-cols-4 w-full sm:w-auto sm:inline-flex gap-1">
+        <TabsList className="grid grid-cols-3 sm:grid-cols-5 w-full sm:w-auto sm:inline-flex gap-1">
           <TabsTrigger value="workers">
             <Users className="w-4 h-4 mr-1.5" /> Workers
+          </TabsTrigger>
+          <TabsTrigger value="reports">
+            <FileText className="w-4 h-4 mr-1.5" /> Reports
           </TabsTrigger>
           <TabsTrigger value="finances">
             <Wallet className="w-4 h-4 mr-1.5" /> Finances
@@ -161,7 +164,7 @@ const FarmView = ({ farm, onBack }: FarmViewProps) => {
             <Package className="w-4 h-4 mr-1.5" /> Inventory
           </TabsTrigger>
           <TabsTrigger value="insights">
-            <Sparkles className="w-4 h-4 mr-1.5" /> AI Insights
+            <Sparkles className="w-4 h-4 mr-1.5" /> AI
           </TabsTrigger>
         </TabsList>
 
