@@ -328,6 +328,12 @@ export function installAutoSync(onResult?: (r: { synced: number; dropped: number
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") trigger();
   });
+  // Flush as soon as a session becomes available (e.g. worker logs in after queueing offline).
+  supabase.auth.onAuthStateChange((event) => {
+    if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION") {
+      trigger();
+    }
+  });
   // Also try once on install in case there are already-queued rows.
   trigger();
 }
