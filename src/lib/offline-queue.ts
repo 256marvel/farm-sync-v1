@@ -120,10 +120,13 @@ export async function listAll(): Promise<QueuedItem[]> {
 }
 
 async function addToQueue<T extends QueueableTable>(table: T, payload: Tables[T]["Insert"]): Promise<QueuedItem<T>> {
+  const id = uid();
+  // Stamp the payload with the queue id so retries are idempotent server-side.
+  const stampedPayload = { ...(payload as any), client_uuid: (payload as any).client_uuid ?? id } as Tables[T]["Insert"];
   const item: QueuedItem<T> = {
-    id: uid(),
+    id,
     table,
-    payload,
+    payload: stampedPayload,
     createdAt: Date.now(),
     attempts: 0,
   };
@@ -181,6 +184,26 @@ function isNetworkError(err: any): boolean {
     msg.includes("typeerror") ||
     !isOnline()
   );
+}
+
+/**
+ * A duplicate-key error means a previous flush attempt actually succeeded
+ * server-side even though we never saw the response. Treat it as success.
+ */
+function isDuplicateError(err: any): boolean {
+  if (!err) return false;
+  const code = String(err.code ?? "");
+  const msg = String(err.message ?? "").toLowerCase();
+  return code === "23505" || msg.includes("duplicate key") || msg.includes("client_uuid");
+}
+
+async function hasSession(): Promise<boolean> {
+  try {
+    const { data } = await supabase.auth.getSession();
+    return !!data.session;
+  } catch {
+    return false;
+  }
 }
 
 /**
