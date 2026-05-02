@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       egg_production: {
         Row: {
+          client_uuid: string | null
           created_at: string
           damaged_eggs: number
           damaged_trays: number
@@ -28,6 +29,7 @@ export type Database = {
           worker_id: string
         }
         Insert: {
+          client_uuid?: string | null
           created_at?: string
           damaged_eggs?: number
           damaged_trays?: number
@@ -40,6 +42,7 @@ export type Database = {
           worker_id: string
         }
         Update: {
+          client_uuid?: string | null
           created_at?: string
           damaged_eggs?: number
           damaged_trays?: number
@@ -177,6 +180,7 @@ export type Database = {
       }
       feed_usage: {
         Row: {
+          client_uuid: string | null
           created_at: string
           date: string
           farm_id: string
@@ -188,6 +192,7 @@ export type Database = {
           worker_id: string
         }
         Insert: {
+          client_uuid?: string | null
           created_at?: string
           date: string
           farm_id: string
@@ -199,6 +204,7 @@ export type Database = {
           worker_id: string
         }
         Update: {
+          client_uuid?: string | null
           created_at?: string
           date?: string
           farm_id?: string
@@ -336,6 +342,7 @@ export type Database = {
       mortality: {
         Row: {
           age_weeks: number
+          client_uuid: string | null
           created_at: string
           date: string
           farm_id: string
@@ -347,6 +354,7 @@ export type Database = {
         }
         Insert: {
           age_weeks: number
+          client_uuid?: string | null
           created_at?: string
           date: string
           farm_id: string
@@ -358,6 +366,7 @@ export type Database = {
         }
         Update: {
           age_weeks?: number
+          client_uuid?: string | null
           created_at?: string
           date?: string
           farm_id?: string
@@ -448,6 +457,7 @@ export type Database = {
         Row: {
           administered_by: string
           birds_vaccinated: number
+          client_uuid: string | null
           created_at: string
           date: string
           farm_id: string
@@ -459,6 +469,7 @@ export type Database = {
         Insert: {
           administered_by: string
           birds_vaccinated: number
+          client_uuid?: string | null
           created_at?: string
           date: string
           farm_id: string
@@ -470,6 +481,7 @@ export type Database = {
         Update: {
           administered_by?: string
           birds_vaccinated?: number
+          client_uuid?: string | null
           created_at?: string
           date?: string
           farm_id?: string
@@ -497,6 +509,7 @@ export type Database = {
       }
       worker_notes: {
         Row: {
+          client_uuid: string | null
           created_at: string
           date: string
           farm_id: string
@@ -506,6 +519,7 @@ export type Database = {
           worker_id: string
         }
         Insert: {
+          client_uuid?: string | null
           created_at?: string
           date: string
           farm_id: string
@@ -515,6 +529,7 @@ export type Database = {
           worker_id: string
         }
         Update: {
+          client_uuid?: string | null
           created_at?: string
           date?: string
           farm_id?: string

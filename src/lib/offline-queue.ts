@@ -120,10 +120,13 @@ export async function listAll(): Promise<QueuedItem[]> {
 }
 
 async function addToQueue<T extends QueueableTable>(table: T, payload: Tables[T]["Insert"]): Promise<QueuedItem<T>> {
+  const id = uid();
+  // Stamp the payload with the queue id so retries are idempotent server-side.
+  const stampedPayload = { ...(payload as any), client_uuid: (payload as any).client_uuid ?? id } as Tables[T]["Insert"];
   const item: QueuedItem<T> = {
-    id: uid(),
+    id,
     table,
-    payload,
+    payload: stampedPayload,
     createdAt: Date.now(),
     attempts: 0,
   };
@@ -184,6 +187,26 @@ function isNetworkError(err: any): boolean {
 }
 
 /**
+ * A duplicate-key error means a previous flush attempt actually succeeded
+ * server-side even though we never saw the response. Treat it as success.
+ */
+function isDuplicateError(err: any): boolean {
+  if (!err) return false;
+  const code = String(err.code ?? "");
+  const msg = String(err.message ?? "").toLowerCase();
+  return code === "23505" || msg.includes("duplicate key") || msg.includes("client_uuid");
+}
+
+async function hasSession(): Promise<boolean> {
+  try {
+    const { data } = await supabase.auth.getSession();
+    return !!data.session;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Insert a row, or queue it for later if the device is offline / the
  * request fails for network reasons.
  *
@@ -196,24 +219,28 @@ export async function enqueueOrInsert<T extends QueueableTable>(
   table: T,
   payload: Tables[T]["Insert"],
 ): Promise<{ queued: boolean }> {
+  // Always stamp a client_uuid so a future retry (online or offline) is idempotent.
+  const stamped = { ...(payload as any), client_uuid: (payload as any).client_uuid ?? uid() } as Tables[T]["Insert"];
+
   if (!isOnline()) {
-    await addToQueue(table, payload);
+    await addToQueue(table, stamped);
     return { queued: true };
   }
   try {
-    const { error } = await supabase.from(table).insert(payload as any);
+    const { error } = await supabase.from(table).insert(stamped as any);
     if (error) {
-      // PostgREST returns errors here. If it looks like a network failure, queue it.
+      if (isDuplicateError(error)) return { queued: false };
       if (isNetworkError(error)) {
-        await addToQueue(table, payload);
+        await addToQueue(table, stamped);
         return { queued: true };
       }
       throw error;
     }
     return { queued: false };
   } catch (err: any) {
+    if (isDuplicateError(err)) return { queued: false };
     if (isNetworkError(err)) {
-      await addToQueue(table, payload);
+      await addToQueue(table, stamped);
       return { queued: true };
     }
     throw err;
@@ -224,9 +251,10 @@ let flushing = false;
 
 /**
  * Try to push every queued row to Supabase. Safe to call repeatedly.
- * Items that fail with a network error stay in the queue; permanent
- * failures are removed and counted as "dropped" so the queue cannot
- * get stuck on a poison record.
+ * - Bails when there's no active session (queued rows would be RLS-denied).
+ * - Network errors keep the item for retry.
+ * - Duplicate-key errors are treated as success (a previous flush already wrote the row).
+ * - Other server errors drop the item to avoid a poison-pill loop.
  */
 export async function flushQueue(): Promise<{ synced: number; dropped: number; remaining: number }> {
   if (flushing) return { synced: 0, dropped: 0, remaining: (await listAll()).length };
@@ -234,17 +262,23 @@ export async function flushQueue(): Promise<{ synced: number; dropped: number; r
   let synced = 0;
   let dropped = 0;
   try {
+    if (!(await hasSession())) {
+      // No auth yet — keep the queue intact and try again later.
+      return { synced: 0, dropped: 0, remaining: (await listAll()).length };
+    }
     const items = await listAll();
     for (const item of items) {
       if (!isOnline()) break;
       try {
         const { error } = await supabase.from(item.table).insert(item.payload as any);
         if (error) {
-          if (isNetworkError(error)) {
-            // keep for next attempt
+          if (isDuplicateError(error)) {
+            // Already saved on a previous attempt — clear from queue.
+            await removeFromQueue(item.id);
+            synced += 1;
+          } else if (isNetworkError(error)) {
             await updateInQueue({ ...item, attempts: item.attempts + 1, lastError: error.message });
           } else {
-            // permanent — drop after marking attempts (avoid silent loss for dev visibility)
             console.warn("[offline-queue] dropping poisoned item", item, error);
             await removeFromQueue(item.id);
             dropped += 1;
@@ -254,7 +288,10 @@ export async function flushQueue(): Promise<{ synced: number; dropped: number; r
           synced += 1;
         }
       } catch (err: any) {
-        if (isNetworkError(err)) {
+        if (isDuplicateError(err)) {
+          await removeFromQueue(item.id);
+          synced += 1;
+        } else if (isNetworkError(err)) {
           await updateInQueue({ ...item, attempts: item.attempts + 1, lastError: String(err?.message ?? err) });
         } else {
           console.warn("[offline-queue] dropping poisoned item", item, err);
@@ -290,6 +327,12 @@ export function installAutoSync(onResult?: (r: { synced: number; dropped: number
   window.addEventListener("online", trigger);
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") trigger();
+  });
+  // Flush as soon as a session becomes available (e.g. worker logs in after queueing offline).
+  supabase.auth.onAuthStateChange((event) => {
+    if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION") {
+      trigger();
+    }
   });
   // Also try once on install in case there are already-queued rows.
   trigger();
