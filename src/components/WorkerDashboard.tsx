@@ -24,6 +24,7 @@ import { MortalityDialog } from "./worker/MortalityDialog";
 import { VaccinationDialog } from "./worker/VaccinationDialog";
 import { NotesDialog } from "./worker/NotesDialog";
 import WorkerMonthlyRecords from "./worker/WorkerMonthlyRecords";
+import SyncStatusPanel from "./SyncStatusPanel";
 import { formatRole, formatUGX } from "@/lib/format";
 
 type Worker = Database["public"]["Tables"]["workers"]["Row"];
