@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CloudUpload, Check, Loader2, WifiOff, Wifi, RefreshCw } from "lucide-react";
+import { CloudUpload, Check, Loader2, WifiOff, Wifi, RefreshCw, AlertTriangle, X } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,11 @@ import {
   subscribeSyncStatus,
   type SyncStatus,
 } from "@/lib/offline-queue";
+import {
+  subscribeConflicts,
+  clearConflicts,
+  type ConflictEntry,
+} from "@/lib/conflict-log";
 import { useToast } from "@/hooks/use-toast";
 
 interface SyncStatusPanelProps {
@@ -39,6 +44,7 @@ const SyncStatusPanel = ({ farmId }: SyncStatusPanelProps) => {
   const { toast } = useToast();
   const [status, setStatus] = useState<SyncStatus | null>(null);
   const [farms, setFarms] = useState<FarmRow[]>([]);
+  const [conflicts, setConflicts] = useState<ConflictEntry[]>([]);
   const [online, setOnline] = useState<boolean>(
     typeof navigator !== "undefined" ? navigator.onLine !== false : true,
   );
@@ -64,6 +70,11 @@ const SyncStatusPanel = ({ farmId }: SyncStatusPanelProps) => {
 
   useEffect(() => {
     const unsub = subscribeSyncStatus((s) => setStatus(s));
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    const unsub = subscribeConflicts((c) => setConflicts(c));
     return () => unsub();
   }, []);
 
@@ -127,7 +138,8 @@ const SyncStatusPanel = ({ farmId }: SyncStatusPanelProps) => {
               size="sm"
               variant="outline"
               onClick={handleSync}
-              disabled={!online || syncing || totalPending === 0}
+              disabled={!online || syncing}
+              title={!online ? "You're offline" : "Force a sync now"}
             >
               {syncing ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -139,7 +151,47 @@ const SyncStatusPanel = ({ farmId }: SyncStatusPanelProps) => {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-2">
+      <CardContent className="space-y-3">
+        {conflicts.length > 0 && (
+          <div className="rounded-lg border border-accent/40 bg-accent/10 p-3">
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <div className="flex items-center gap-2 text-sm font-semibold">
+                <AlertTriangle className="w-4 h-4 text-accent-foreground" />
+                Recent edit conflicts ({conflicts.length})
+              </div>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 px-2"
+                onClick={() => clearConflicts()}
+                aria-label="Dismiss conflicts"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            <ul className="space-y-1 text-xs">
+              {conflicts
+                .slice()
+                .reverse()
+                .slice(0, 5)
+                .map((c) => (
+                  <li key={c.id} className="flex items-center justify-between gap-2">
+                    <span className="truncate">
+                      <span className="font-medium">{c.recordLabel ?? c.table}</span>
+                      <span className="text-muted-foreground"> · {formatRelative(c.resolvedAt)}</span>
+                    </span>
+                    <Badge variant="outline" className="shrink-0 text-[10px]">
+                      {c.resolution === "kept-mine"
+                        ? "Yours kept"
+                        : c.resolution === "kept-theirs"
+                        ? "Server kept"
+                        : c.resolution}
+                    </Badge>
+                  </li>
+                ))}
+            </ul>
+          </div>
+        )}
         {visibleFarms.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-4">No farms to display.</p>
         ) : (

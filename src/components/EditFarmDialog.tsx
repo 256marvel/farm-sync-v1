@@ -12,6 +12,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
+import ConflictResolutionDialog, { type ConflictField } from "./ConflictResolutionDialog";
+import { recordConflict } from "@/lib/conflict-log";
 
 type Farm = Database["public"]["Tables"]["farms"]["Row"];
 
@@ -37,6 +39,12 @@ interface EditFarmDialogProps {
 
 const EditFarmDialog = ({ open, onOpenChange, farm, onSuccess }: EditFarmDialogProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [baseUpdatedAt, setBaseUpdatedAt] = useState<string | null>(null);
+  const [conflict, setConflict] = useState<{
+    fields: ConflictField[];
+    serverRow: Farm;
+    pendingValues: z.infer<typeof formSchema>;
+  } | null>(null);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -57,6 +65,7 @@ const EditFarmDialog = ({ open, onOpenChange, farm, onSuccess }: EditFarmDialogP
 
   useEffect(() => {
     if (farm) {
+      setBaseUpdatedAt(farm.updated_at);
       form.reset({
         name: farm.name,
         farm_type: farm.farm_type as "layers" | "broilers" | "dual_purpose",
@@ -72,35 +81,101 @@ const EditFarmDialog = ({ open, onOpenChange, farm, onSuccess }: EditFarmDialogP
     }
   }, [farm, form]);
 
+  const buildPatch = (values: z.infer<typeof formSchema>) => ({
+    name: values.name,
+    farm_type: values.farm_type,
+    location_district: values.location_district,
+    location_subcounty: values.location_subcounty || null,
+    location_parish: values.location_parish || null,
+    location_village: values.location_village || null,
+    size_acres: values.size_acres ? parseFloat(values.size_acres) : null,
+    bird_capacity: values.bird_capacity ? parseInt(values.bird_capacity) : null,
+    start_date: values.start_date,
+    description: values.description || null,
+  });
+
+  /**
+   * Compare submitted form values to the latest server row and build a
+   * field-level diff for the conflict resolver. Only fields that actually
+   * differ are surfaced.
+   */
+  const buildConflictFields = (
+    values: z.infer<typeof formSchema>,
+    server: Farm,
+  ): ConflictField[] => {
+    const rows: ConflictField[] = [
+      { label: "Name", mine: values.name, theirs: server.name },
+      { label: "Farm type", mine: values.farm_type, theirs: server.farm_type },
+      { label: "District", mine: values.location_district, theirs: server.location_district },
+      { label: "Subcounty", mine: values.location_subcounty || "", theirs: server.location_subcounty || "" },
+      { label: "Parish", mine: values.location_parish || "", theirs: server.location_parish || "" },
+      { label: "Village", mine: values.location_village || "", theirs: server.location_village || "" },
+      { label: "Size (acres)", mine: values.size_acres || "", theirs: server.size_acres?.toString() || "" },
+      { label: "Bird capacity", mine: values.bird_capacity || "", theirs: server.bird_capacity?.toString() || "" },
+      { label: "Start date", mine: values.start_date, theirs: server.start_date },
+      { label: "Description", mine: values.description || "", theirs: server.description || "" },
+    ];
+    return rows.filter((r) => r.mine !== r.theirs);
+  };
+
+  const performUpdate = async (values: z.infer<typeof formSchema>): Promise<{ ok: boolean; conflictRow?: Farm }> => {
+    if (!farm) return { ok: false };
+    // Optimistic-concurrency guard: only update when the row hasn't changed
+    // since we loaded it. If `updated_at` no longer matches, the eq-filter
+    // matches zero rows and we treat it as a conflict.
+    const baseStamp = baseUpdatedAt ?? farm.updated_at;
+    const { data, error } = await supabase
+      .from("farms")
+      .update(buildPatch(values))
+      .eq("id", farm.id)
+      .eq("updated_at", baseStamp)
+      .select()
+      .maybeSingle();
+
+    if (error) throw error;
+
+    if (!data) {
+      // Either someone else won the race or the row was deleted. Refetch.
+      const { data: latest } = await supabase
+        .from("farms")
+        .select("*")
+        .eq("id", farm.id)
+        .maybeSingle();
+      return { ok: false, conflictRow: (latest as Farm) ?? undefined };
+    }
+    return { ok: true };
+  };
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!farm) return;
     setIsSubmitting(true);
     try {
-      const { error } = await supabase
-        .from("farms")
-        .update({
-          name: values.name,
-          farm_type: values.farm_type,
-          location_district: values.location_district,
-          location_subcounty: values.location_subcounty || null,
-          location_parish: values.location_parish || null,
-          location_village: values.location_village || null,
-          size_acres: values.size_acres ? parseFloat(values.size_acres) : null,
-          bird_capacity: values.bird_capacity ? parseInt(values.bird_capacity) : null,
-          start_date: values.start_date,
-          description: values.description || null,
-        })
-        .eq("id", farm.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Farm updated ✅",
-        description: "Your changes have been saved",
-      });
-
-      onOpenChange(false);
-      onSuccess();
+      const result = await performUpdate(values);
+      if (result.ok) {
+        toast({ title: "Farm updated ✅", description: "Your changes have been saved" });
+        onOpenChange(false);
+        onSuccess();
+        return;
+      }
+      if (result.conflictRow) {
+        const fields = buildConflictFields(values, result.conflictRow);
+        if (fields.length === 0) {
+          // Server row already matches our values — nothing to resolve.
+          toast({ title: "Already up to date", description: "Server already had your changes." });
+          onOpenChange(false);
+          onSuccess();
+          return;
+        }
+        setConflict({ fields, serverRow: result.conflictRow, pendingValues: values });
+      } else {
+        toast({
+          title: "Record removed",
+          description: "This farm was deleted by another user.",
+          variant: "destructive",
+        });
+        onOpenChange(false);
+        onSuccess();
+      }
     } catch (error: any) {
       toast({
         title: "Error updating farm",
@@ -110,6 +185,49 @@ const EditFarmDialog = ({ open, onOpenChange, farm, onSuccess }: EditFarmDialogP
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleKeepMine = async () => {
+    if (!conflict || !farm) return;
+    setIsSubmitting(true);
+    try {
+      // Force overwrite using the now-known server stamp.
+      const { error } = await supabase
+        .from("farms")
+        .update(buildPatch(conflict.pendingValues))
+        .eq("id", farm.id);
+      if (error) throw error;
+      recordConflict({
+        table: "farms",
+        recordId: farm.id,
+        farmId: farm.id,
+        recordLabel: farm.name,
+        resolution: "kept-mine",
+      });
+      toast({ title: "Your version saved", description: "Server changes were overwritten." });
+      setConflict(null);
+      onOpenChange(false);
+      onSuccess();
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleKeepTheirs = () => {
+    if (!conflict || !farm) return;
+    recordConflict({
+      table: "farms",
+      recordId: farm.id,
+      farmId: farm.id,
+      recordLabel: farm.name,
+      resolution: "kept-theirs",
+    });
+    toast({ title: "Server version kept", description: "Your edits were discarded." });
+    setConflict(null);
+    onOpenChange(false);
+    onSuccess();
   };
 
   return (
@@ -296,6 +414,17 @@ const EditFarmDialog = ({ open, onOpenChange, farm, onSuccess }: EditFarmDialogP
           </form>
         </Form>
       </DialogContent>
+
+      <ConflictResolutionDialog
+        open={!!conflict}
+        onOpenChange={(o) => { if (!o) setConflict(null); }}
+        title="Farm edit conflict"
+        recordLabel={farm?.name}
+        theirUpdatedAt={conflict?.serverRow.updated_at}
+        fields={conflict?.fields ?? []}
+        onKeepMine={handleKeepMine}
+        onKeepTheirs={handleKeepTheirs}
+      />
     </Dialog>
   );
 };
