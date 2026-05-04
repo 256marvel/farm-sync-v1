@@ -11,6 +11,7 @@ import FarmFinances from "./finance/FarmFinances";
 import FarmInventory from "./inventory/FarmInventory";
 import FarmInsights from "./insights/FarmInsights";
 import FarmDailyReports from "./staff/FarmDailyReports";
+import SyncStatusPanel from "./SyncStatusPanel";
 import { formatRole } from "@/lib/format";
 import type { FarmRole } from "@/hooks/use-farm-role";
 
