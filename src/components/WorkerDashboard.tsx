@@ -153,6 +153,9 @@ const WorkerDashboard = ({ userId }: WorkerDashboardProps) => {
         </CardContent>
       </Card>
 
+      {/* Sync Status */}
+      <SyncStatusPanel farmId={farm.id} />
+
       {/* Monthly Records */}
       <WorkerMonthlyRecords workerId={worker.id} refreshKey={refreshKey} />
 
