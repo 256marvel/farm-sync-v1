@@ -121,7 +121,8 @@ const StaffDashboard = ({ userId, role }: StaffDashboardProps) => {
             <Sparkles className="w-4 h-4 mr-1.5" /> AI
           </TabsTrigger>
         </TabsList>
-        <TabsContent value="reports" className="mt-4 sm:mt-6">
+        <TabsContent value="reports" className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
+          <SyncStatusPanel farmId={farm.id} />
           <FarmDailyReports farmId={farm.id} />
         </TabsContent>
         <TabsContent value="team" className="mt-4 sm:mt-6">
