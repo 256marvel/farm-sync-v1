@@ -74,6 +74,11 @@ const SyncStatusPanel = ({ farmId }: SyncStatusPanelProps) => {
   }, []);
 
   useEffect(() => {
+    const unsub = subscribeConflicts((c) => setConflicts(c));
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
     const fetchFarms = async () => {
       let q = supabase.from("farms").select("id, name").eq("is_active", true);
       if (farmId) q = q.eq("id", farmId);
