@@ -13,6 +13,7 @@ import FarmFinances from "./finance/FarmFinances";
 import FarmInventory from "./inventory/FarmInventory";
 import FarmInsights from "./insights/FarmInsights";
 import FarmDailyReports from "./staff/FarmDailyReports";
+import SyncStatusPanel from "./SyncStatusPanel";
 
 type Farm = Database["public"]["Tables"]["farms"]["Row"];
 type Worker = Database["public"]["Tables"]["workers"]["Row"];
