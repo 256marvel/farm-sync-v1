@@ -11,6 +11,7 @@ import FarmFinances from "./finance/FarmFinances";
 import FarmInventory from "./inventory/FarmInventory";
 import FarmInsights from "./insights/FarmInsights";
 import FarmDailyReports from "./staff/FarmDailyReports";
+import SyncStatusPanel from "./SyncStatusPanel";
 import { formatRole } from "@/lib/format";
 import type { FarmRole } from "@/hooks/use-farm-role";
 
@@ -120,7 +121,8 @@ const StaffDashboard = ({ userId, role }: StaffDashboardProps) => {
             <Sparkles className="w-4 h-4 mr-1.5" /> AI
           </TabsTrigger>
         </TabsList>
-        <TabsContent value="reports" className="mt-4 sm:mt-6">
+        <TabsContent value="reports" className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
+          <SyncStatusPanel farmId={farm.id} />
           <FarmDailyReports farmId={farm.id} />
         </TabsContent>
         <TabsContent value="team" className="mt-4 sm:mt-6">

@@ -89,17 +89,82 @@ function uid(): string {
 type Listener = (count: number) => void;
 const listeners = new Set<Listener>();
 
-async function notify() {
+type StatusListener = (status: SyncStatus) => void;
+const statusListeners = new Set<StatusListener>();
+
+export interface SyncStatus {
+  total: number;
+  pendingByFarm: Record<string, number>;
+  lastSyncByFarm: Record<string, number>;
+  lastSyncOverall: number | null;
+}
+
+const LAST_SYNC_KEY = "farmsync-last-sync-by-farm";
+
+function readLastSync(): Record<string, number> {
+  try {
+    if (typeof localStorage === "undefined") return {};
+    const raw = localStorage.getItem(LAST_SYNC_KEY);
+    return raw ? (JSON.parse(raw) as Record<string, number>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeLastSync(map: Record<string, number>) {
+  try {
+    if (typeof localStorage === "undefined") return;
+    localStorage.setItem(LAST_SYNC_KEY, JSON.stringify(map));
+  } catch {
+    /* ignore */
+  }
+}
+
+function markFarmSynced(farmId: string | undefined | null) {
+  if (!farmId) return;
+  const map = readLastSync();
+  map[farmId] = Date.now();
+  writeLastSync(map);
+}
+
+export async function getSyncStatus(): Promise<SyncStatus> {
   const items = await listAll().catch(() => [] as QueuedItem[]);
-  listeners.forEach((l) => l(items.length));
+  const pendingByFarm: Record<string, number> = {};
+  for (const it of items) {
+    const fid = (it.payload as any)?.farm_id;
+    if (!fid) continue;
+    pendingByFarm[fid] = (pendingByFarm[fid] ?? 0) + 1;
+  }
+  const lastSyncByFarm = readLastSync();
+  const stamps = Object.values(lastSyncByFarm);
+  const lastSyncOverall = stamps.length ? Math.max(...stamps) : null;
+  return {
+    total: items.length,
+    pendingByFarm,
+    lastSyncByFarm,
+    lastSyncOverall,
+  };
+}
+
+async function notify() {
+  const status = await getSyncStatus();
+  listeners.forEach((l) => l(status.total));
+  statusListeners.forEach((l) => l(status));
 }
 
 export function subscribePending(listener: Listener): () => void {
   listeners.add(listener);
-  // Push current value asynchronously
   notify();
   return () => {
     listeners.delete(listener);
+  };
+}
+
+export function subscribeSyncStatus(listener: StatusListener): () => void {
+  statusListeners.add(listener);
+  getSyncStatus().then((s) => listener(s));
+  return () => {
+    statusListeners.delete(listener);
   };
 }
 
@@ -229,16 +294,23 @@ export async function enqueueOrInsert<T extends QueueableTable>(
   try {
     const { error } = await supabase.from(table).insert(stamped as any);
     if (error) {
-      if (isDuplicateError(error)) return { queued: false };
+      if (isDuplicateError(error)) {
+        markFarmSynced((stamped as any).farm_id);
+        return { queued: false };
+      }
       if (isNetworkError(error)) {
         await addToQueue(table, stamped);
         return { queued: true };
       }
       throw error;
     }
+    markFarmSynced((stamped as any).farm_id);
     return { queued: false };
   } catch (err: any) {
-    if (isDuplicateError(err)) return { queued: false };
+    if (isDuplicateError(err)) {
+      markFarmSynced((stamped as any).farm_id);
+      return { queued: false };
+    }
     if (isNetworkError(err)) {
       await addToQueue(table, stamped);
       return { queued: true };
@@ -271,10 +343,11 @@ export async function flushQueue(): Promise<{ synced: number; dropped: number; r
       if (!isOnline()) break;
       try {
         const { error } = await supabase.from(item.table).insert(item.payload as any);
+        const farmId = (item.payload as any)?.farm_id;
         if (error) {
           if (isDuplicateError(error)) {
-            // Already saved on a previous attempt — clear from queue.
             await removeFromQueue(item.id);
+            markFarmSynced(farmId);
             synced += 1;
           } else if (isNetworkError(error)) {
             await updateInQueue({ ...item, attempts: item.attempts + 1, lastError: error.message });
@@ -285,11 +358,14 @@ export async function flushQueue(): Promise<{ synced: number; dropped: number; r
           }
         } else {
           await removeFromQueue(item.id);
+          markFarmSynced(farmId);
           synced += 1;
         }
       } catch (err: any) {
+        const farmId = (item.payload as any)?.farm_id;
         if (isDuplicateError(err)) {
           await removeFromQueue(item.id);
+          markFarmSynced(farmId);
           synced += 1;
         } else if (isNetworkError(err)) {
           await updateInQueue({ ...item, attempts: item.attempts + 1, lastError: String(err?.message ?? err) });
