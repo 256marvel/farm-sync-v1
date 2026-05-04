@@ -294,13 +294,17 @@ export async function enqueueOrInsert<T extends QueueableTable>(
   try {
     const { error } = await supabase.from(table).insert(stamped as any);
     if (error) {
-      if (isDuplicateError(error)) return { queued: false };
+      if (isDuplicateError(error)) {
+        markFarmSynced((stamped as any).farm_id);
+        return { queued: false };
+      }
       if (isNetworkError(error)) {
         await addToQueue(table, stamped);
         return { queued: true };
       }
       throw error;
     }
+    markFarmSynced((stamped as any).farm_id);
     return { queued: false };
   } catch (err: any) {
     if (isDuplicateError(err)) return { queued: false };
