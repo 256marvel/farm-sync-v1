@@ -89,17 +89,82 @@ function uid(): string {
 type Listener = (count: number) => void;
 const listeners = new Set<Listener>();
 
-async function notify() {
+type StatusListener = (status: SyncStatus) => void;
+const statusListeners = new Set<StatusListener>();
+
+export interface SyncStatus {
+  total: number;
+  pendingByFarm: Record<string, number>;
+  lastSyncByFarm: Record<string, number>;
+  lastSyncOverall: number | null;
+}
+
+const LAST_SYNC_KEY = "farmsync-last-sync-by-farm";
+
+function readLastSync(): Record<string, number> {
+  try {
+    if (typeof localStorage === "undefined") return {};
+    const raw = localStorage.getItem(LAST_SYNC_KEY);
+    return raw ? (JSON.parse(raw) as Record<string, number>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeLastSync(map: Record<string, number>) {
+  try {
+    if (typeof localStorage === "undefined") return;
+    localStorage.setItem(LAST_SYNC_KEY, JSON.stringify(map));
+  } catch {
+    /* ignore */
+  }
+}
+
+function markFarmSynced(farmId: string | undefined | null) {
+  if (!farmId) return;
+  const map = readLastSync();
+  map[farmId] = Date.now();
+  writeLastSync(map);
+}
+
+export async function getSyncStatus(): Promise<SyncStatus> {
   const items = await listAll().catch(() => [] as QueuedItem[]);
-  listeners.forEach((l) => l(items.length));
+  const pendingByFarm: Record<string, number> = {};
+  for (const it of items) {
+    const fid = (it.payload as any)?.farm_id;
+    if (!fid) continue;
+    pendingByFarm[fid] = (pendingByFarm[fid] ?? 0) + 1;
+  }
+  const lastSyncByFarm = readLastSync();
+  const stamps = Object.values(lastSyncByFarm);
+  const lastSyncOverall = stamps.length ? Math.max(...stamps) : null;
+  return {
+    total: items.length,
+    pendingByFarm,
+    lastSyncByFarm,
+    lastSyncOverall,
+  };
+}
+
+async function notify() {
+  const status = await getSyncStatus();
+  listeners.forEach((l) => l(status.total));
+  statusListeners.forEach((l) => l(status));
 }
 
 export function subscribePending(listener: Listener): () => void {
   listeners.add(listener);
-  // Push current value asynchronously
   notify();
   return () => {
     listeners.delete(listener);
+  };
+}
+
+export function subscribeSyncStatus(listener: StatusListener): () => void {
+  statusListeners.add(listener);
+  getSyncStatus().then((s) => listener(s));
+  return () => {
+    statusListeners.delete(listener);
   };
 }
 
