@@ -307,7 +307,10 @@ export async function enqueueOrInsert<T extends QueueableTable>(
     markFarmSynced((stamped as any).farm_id);
     return { queued: false };
   } catch (err: any) {
-    if (isDuplicateError(err)) return { queued: false };
+    if (isDuplicateError(err)) {
+      markFarmSynced((stamped as any).farm_id);
+      return { queued: false };
+    }
     if (isNetworkError(err)) {
       await addToQueue(table, stamped);
       return { queued: true };
