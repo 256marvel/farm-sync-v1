@@ -14,6 +14,7 @@ import WorkerDashboard from "@/components/WorkerDashboard";
 import StaffDashboard from "@/components/StaffDashboard";
 import AccountantDashboard from "@/components/AccountantDashboard";
 import OfflineSyncIndicator from "@/components/OfflineSyncIndicator";
+import SyncStatusPanel from "@/components/SyncStatusPanel";
 
 type Farm = Database["public"]["Tables"]["farms"]["Row"];
 type WorkerRole = Database["public"]["Enums"]["worker_role"];
