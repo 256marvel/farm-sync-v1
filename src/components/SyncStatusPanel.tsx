@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CloudUpload, Check, Loader2, WifiOff, Wifi, RefreshCw } from "lucide-react";
+import { CloudUpload, Check, Loader2, WifiOff, Wifi, RefreshCw, AlertTriangle, X } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,11 @@ import {
   subscribeSyncStatus,
   type SyncStatus,
 } from "@/lib/offline-queue";
+import {
+  subscribeConflicts,
+  clearConflicts,
+  type ConflictEntry,
+} from "@/lib/conflict-log";
 import { useToast } from "@/hooks/use-toast";
 
 interface SyncStatusPanelProps {
