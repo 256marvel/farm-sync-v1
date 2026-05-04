@@ -343,10 +343,11 @@ export async function flushQueue(): Promise<{ synced: number; dropped: number; r
       if (!isOnline()) break;
       try {
         const { error } = await supabase.from(item.table).insert(item.payload as any);
+        const farmId = (item.payload as any)?.farm_id;
         if (error) {
           if (isDuplicateError(error)) {
-            // Already saved on a previous attempt — clear from queue.
             await removeFromQueue(item.id);
+            markFarmSynced(farmId);
             synced += 1;
           } else if (isNetworkError(error)) {
             await updateInQueue({ ...item, attempts: item.attempts + 1, lastError: error.message });
@@ -357,11 +358,14 @@ export async function flushQueue(): Promise<{ synced: number; dropped: number; r
           }
         } else {
           await removeFromQueue(item.id);
+          markFarmSynced(farmId);
           synced += 1;
         }
       } catch (err: any) {
+        const farmId = (item.payload as any)?.farm_id;
         if (isDuplicateError(err)) {
           await removeFromQueue(item.id);
+          markFarmSynced(farmId);
           synced += 1;
         } else if (isNetworkError(err)) {
           await updateInQueue({ ...item, attempts: item.attempts + 1, lastError: String(err?.message ?? err) });
