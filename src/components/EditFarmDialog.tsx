@@ -414,6 +414,17 @@ const EditFarmDialog = ({ open, onOpenChange, farm, onSuccess }: EditFarmDialogP
           </form>
         </Form>
       </DialogContent>
+
+      <ConflictResolutionDialog
+        open={!!conflict}
+        onOpenChange={(o) => { if (!o) setConflict(null); }}
+        title="Farm edit conflict"
+        recordLabel={farm?.name}
+        theirUpdatedAt={conflict?.serverRow.updated_at}
+        fields={conflict?.fields ?? []}
+        onKeepMine={handleKeepMine}
+        onKeepTheirs={handleKeepTheirs}
+      />
     </Dialog>
   );
 };
