@@ -385,31 +385,60 @@ export async function flushQueue(): Promise<{ synced: number; dropped: number; r
 
 // ---------- Auto-flush wiring ----------
 
+type FlushResult = { synced: number; dropped: number; remaining: number };
+const resultListeners = new Set<(r: FlushResult) => void>();
+
 let installed = false;
-export function installAutoSync(onResult?: (r: { synced: number; dropped: number; remaining: number }) => void) {
-  if (installed || typeof window === "undefined") return;
-  installed = true;
+let retryTimer: ReturnType<typeof setInterval> | null = null;
 
-  const trigger = async () => {
-    if (!isOnline()) return;
-    try {
-      const result = await flushQueue();
-      if (onResult && (result.synced > 0 || result.dropped > 0)) onResult(result);
-    } catch (e) {
-      console.warn("[offline-queue] flush failed", e);
+async function autoTrigger() {
+  if (!isOnline()) return;
+  try {
+    const result = await flushQueue();
+    if (result.synced > 0 || result.dropped > 0) {
+      resultListeners.forEach((l) => l(result));
     }
-  };
-
-  window.addEventListener("online", trigger);
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") trigger();
-  });
-  // Flush as soon as a session becomes available (e.g. worker logs in after queueing offline).
-  supabase.auth.onAuthStateChange((event) => {
-    if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION") {
-      trigger();
-    }
-  });
-  // Also try once on install in case there are already-queued rows.
-  trigger();
+  } catch (e) {
+    console.warn("[offline-queue] flush failed", e);
+  }
 }
+
+/**
+ * Install global auto-sync wiring. Safe to call multiple times — only the
+ * first call wires up the listeners; subsequent calls just register the
+ * onResult callback so any mounted component can react to a successful flush.
+ */
+export function installAutoSync(onResult?: (r: FlushResult) => void) {
+  if (typeof window === "undefined") return () => {};
+  if (onResult) resultListeners.add(onResult);
+
+  if (!installed) {
+    installed = true;
+
+    window.addEventListener("online", autoTrigger);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") autoTrigger();
+    });
+    // Flush as soon as a session becomes available (e.g. worker logs in after queueing offline).
+    supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION") {
+        autoTrigger();
+      }
+    });
+    // Periodic safety-net retry (covers flaky networks where the `online`
+    // event never fires, e.g. captive portals or mobile data switches).
+    retryTimer = setInterval(autoTrigger, 60_000);
+    // Try once on install in case there are already-queued rows.
+    autoTrigger();
+  }
+
+  return () => {
+    if (onResult) resultListeners.delete(onResult);
+  };
+}
+
+/** Force an immediate auto-flush attempt (no-op if offline). */
+export function triggerAutoSync() {
+  return autoTrigger();
+}
+
