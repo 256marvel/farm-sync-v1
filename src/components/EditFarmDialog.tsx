@@ -12,6 +12,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
+import ConflictResolutionDialog, { type ConflictField } from "./ConflictResolutionDialog";
+import { recordConflict } from "@/lib/conflict-log";
 
 type Farm = Database["public"]["Tables"]["farms"]["Row"];
 
