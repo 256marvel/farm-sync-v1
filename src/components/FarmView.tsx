@@ -203,7 +203,8 @@ const FarmView = ({ farm, onBack }: FarmViewProps) => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="reports" className="mt-4 sm:mt-6">
+        <TabsContent value="reports" className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
+          <SyncStatusPanel farmId={farm.id} />
           <FarmDailyReports farmId={farm.id} />
         </TabsContent>
 
