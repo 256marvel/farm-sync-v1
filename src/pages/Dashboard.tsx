@@ -205,6 +205,10 @@ const Dashboard = () => {
               onFarmSelect={handleFarmSelect}
               onCreateFarm={() => setCreateFarmOpen(true)}
             />
+
+            <div className="mt-8">
+              <SyncStatusPanel />
+            </div>
           </>
         )}
       </main>
