@@ -44,6 +44,7 @@ const SyncStatusPanel = ({ farmId }: SyncStatusPanelProps) => {
   const { toast } = useToast();
   const [status, setStatus] = useState<SyncStatus | null>(null);
   const [farms, setFarms] = useState<FarmRow[]>([]);
+  const [conflicts, setConflicts] = useState<ConflictEntry[]>([]);
   const [online, setOnline] = useState<boolean>(
     typeof navigator !== "undefined" ? navigator.onLine !== false : true,
   );
