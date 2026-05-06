@@ -152,20 +152,20 @@ const FarmView = ({ farm, onBack }: FarmViewProps) => {
       {/* Top-level tabs */}
       <Tabs defaultValue="workers" className="w-full">
         <TabsList className="grid grid-cols-5 w-full gap-1 h-auto p-1">
-          <TabsTrigger value="workers">
-            <Users className="w-4 h-4 mr-1.5" /> Workers
+          <TabsTrigger value="workers" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
+            <Users className="w-4 h-4" /> Workers
           </TabsTrigger>
-          <TabsTrigger value="reports">
-            <FileText className="w-4 h-4 mr-1.5" /> Reports
+          <TabsTrigger value="reports" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
+            <FileText className="w-4 h-4" /> Reports
           </TabsTrigger>
-          <TabsTrigger value="finances">
-            <Wallet className="w-4 h-4 mr-1.5" /> Finances
+          <TabsTrigger value="finances" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
+            <Wallet className="w-4 h-4" /> Finances
           </TabsTrigger>
-          <TabsTrigger value="inventory">
-            <Package className="w-4 h-4 mr-1.5" /> Inventory
+          <TabsTrigger value="inventory" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
+            <Package className="w-4 h-4" /> Inventory
           </TabsTrigger>
-          <TabsTrigger value="insights">
-            <Sparkles className="w-4 h-4 mr-1.5" /> AI
+          <TabsTrigger value="insights" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
+            <Sparkles className="w-4 h-4" /> AI
           </TabsTrigger>
          </TabsList>
 
