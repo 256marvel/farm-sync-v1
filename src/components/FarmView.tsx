@@ -188,9 +188,9 @@ const FarmView = ({ farm, onBack }: FarmViewProps) => {
             </CardHeader>
             <CardContent>
               <Tabs defaultValue="manage">
-                <TabsList className="grid grid-cols-2 w-full sm:w-auto sm:inline-flex">
-                  <TabsTrigger value="manage">Management</TabsTrigger>
-                  <TabsTrigger value="directory">Directory</TabsTrigger>
+                <TabsList aria-label="Workers view" className="grid grid-cols-2 w-full sm:w-auto sm:inline-flex">
+                  <TabsTrigger value="manage" aria-label="Worker management">Management</TabsTrigger>
+                  <TabsTrigger value="directory" aria-label="Staff directory">Directory</TabsTrigger>
                 </TabsList>
                 <TabsContent value="manage" className="mt-4">
                   <WorkersList workers={workers} loading={loading} onRefresh={fetchWorkers} />
