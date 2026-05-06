@@ -73,22 +73,20 @@ const AccountantDashboard = ({ userId }: AccountantDashboardProps) => {
       </div>
 
       <Tabs defaultValue="finances" className="w-full">
-        <div className="-mx-1 overflow-x-auto no-scrollbar">
-        <TabsList className="inline-flex w-max gap-1">
-          <TabsTrigger value="finances">
-            <Wallet className="w-4 h-4 mr-1.5" /> Finances
+        <TabsList className="grid grid-cols-4 w-full gap-1 h-auto p-1">
+          <TabsTrigger value="finances" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
+            <Wallet className="w-4 h-4" /> Finances
           </TabsTrigger>
-          <TabsTrigger value="payroll">
-            <UsersIcon className="w-4 h-4 mr-1.5" /> Payroll
+          <TabsTrigger value="payroll" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
+            <UsersIcon className="w-4 h-4" /> Payroll
           </TabsTrigger>
-          <TabsTrigger value="inventory">
-            <Package className="w-4 h-4 mr-1.5" /> Inventory
+          <TabsTrigger value="inventory" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
+            <Package className="w-4 h-4" /> Inventory
           </TabsTrigger>
-          <TabsTrigger value="insights">
-            <Sparkles className="w-4 h-4 mr-1.5" /> AI
+          <TabsTrigger value="insights" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
+            <Sparkles className="w-4 h-4" /> AI
           </TabsTrigger>
         </TabsList>
-        </div>
         <TabsContent value="finances" className="mt-4 sm:mt-6">
           <FarmFinances farmId={farm.id} userId={userId} canDelete={true} />
         </TabsContent>
