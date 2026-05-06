@@ -104,8 +104,7 @@ const StaffDashboard = ({ userId, role }: StaffDashboardProps) => {
       </div>
 
       <Tabs defaultValue="reports" className="w-full">
-        <div className="-mx-1 overflow-x-auto no-scrollbar">
-        <TabsList className="inline-flex w-max gap-1">
+        <TabsList className="grid grid-cols-5 w-full gap-1 h-auto p-1">
           <TabsTrigger value="reports">
             <FileText className="w-4 h-4 mr-1.5" /> Reports
           </TabsTrigger>
@@ -122,7 +121,6 @@ const StaffDashboard = ({ userId, role }: StaffDashboardProps) => {
             <Sparkles className="w-4 h-4 mr-1.5" /> AI
           </TabsTrigger>
         </TabsList>
-        </div>
         <TabsContent value="reports" className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
           <SyncStatusPanel farmId={farm.id} />
           <FarmDailyReports farmId={farm.id} />

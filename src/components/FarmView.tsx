@@ -151,8 +151,7 @@ const FarmView = ({ farm, onBack }: FarmViewProps) => {
 
       {/* Top-level tabs */}
       <Tabs defaultValue="workers" className="w-full">
-        <div className="-mx-1 overflow-x-auto no-scrollbar">
-        <TabsList className="inline-flex w-max gap-1">
+        <TabsList className="grid grid-cols-5 w-full gap-1 h-auto p-1">
           <TabsTrigger value="workers">
             <Users className="w-4 h-4 mr-1.5" /> Workers
           </TabsTrigger>
@@ -169,7 +168,6 @@ const FarmView = ({ farm, onBack }: FarmViewProps) => {
             <Sparkles className="w-4 h-4 mr-1.5" /> AI
           </TabsTrigger>
          </TabsList>
-         </div>
 
         <TabsContent value="workers" className="mt-4 sm:mt-6">
           <Card>

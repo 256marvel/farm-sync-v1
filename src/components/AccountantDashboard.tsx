@@ -73,8 +73,7 @@ const AccountantDashboard = ({ userId }: AccountantDashboardProps) => {
       </div>
 
       <Tabs defaultValue="finances" className="w-full">
-        <div className="-mx-1 overflow-x-auto no-scrollbar">
-        <TabsList className="inline-flex w-max gap-1">
+        <TabsList className="grid grid-cols-4 w-full gap-1 h-auto p-1">
           <TabsTrigger value="finances">
             <Wallet className="w-4 h-4 mr-1.5" /> Finances
           </TabsTrigger>
@@ -88,7 +87,6 @@ const AccountantDashboard = ({ userId }: AccountantDashboardProps) => {
             <Sparkles className="w-4 h-4 mr-1.5" /> AI
           </TabsTrigger>
         </TabsList>
-        </div>
         <TabsContent value="finances" className="mt-4 sm:mt-6">
           <FarmFinances farmId={farm.id} userId={userId} canDelete={true} />
         </TabsContent>
