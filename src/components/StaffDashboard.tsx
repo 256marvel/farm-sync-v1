@@ -104,21 +104,21 @@ const StaffDashboard = ({ userId, role }: StaffDashboardProps) => {
       </div>
 
       <Tabs defaultValue="reports" className="w-full">
-        <TabsList className="grid grid-cols-5 w-full gap-1 h-auto p-1">
-          <TabsTrigger value="reports" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
-            <FileText className="w-4 h-4" /> Reports
+        <TabsList aria-label="Dashboard sections" className="grid grid-cols-5 w-full gap-1 h-auto p-1">
+          <TabsTrigger value="reports" aria-label="Reports" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
+            <FileText className="w-4 h-4" aria-hidden="true" /> Reports
           </TabsTrigger>
-          <TabsTrigger value="team" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
-            <UsersIcon className="w-4 h-4" /> Team
+          <TabsTrigger value="team" aria-label="Team" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
+            <UsersIcon className="w-4 h-4" aria-hidden="true" /> Team
           </TabsTrigger>
-          <TabsTrigger value="finances" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
-            <Wallet className="w-4 h-4" /> Finances
+          <TabsTrigger value="finances" aria-label="Finances" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
+            <Wallet className="w-4 h-4" aria-hidden="true" /> Finances
           </TabsTrigger>
-          <TabsTrigger value="inventory" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
-            <Package className="w-4 h-4" /> Inventory
+          <TabsTrigger value="inventory" aria-label="Inventory" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
+            <Package className="w-4 h-4" aria-hidden="true" /> Inventory
           </TabsTrigger>
-          <TabsTrigger value="insights" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
-            <Sparkles className="w-4 h-4" /> AI
+          <TabsTrigger value="insights" aria-label="AI Insights" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
+            <Sparkles className="w-4 h-4" aria-hidden="true" /> AI
           </TabsTrigger>
         </TabsList>
         <TabsContent value="reports" className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">

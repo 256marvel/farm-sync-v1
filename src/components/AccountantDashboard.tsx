@@ -73,18 +73,18 @@ const AccountantDashboard = ({ userId }: AccountantDashboardProps) => {
       </div>
 
       <Tabs defaultValue="finances" className="w-full">
-        <TabsList className="grid grid-cols-4 w-full gap-1 h-auto p-1">
-          <TabsTrigger value="finances" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
-            <Wallet className="w-4 h-4" /> Finances
+        <TabsList aria-label="Accountant sections" className="grid grid-cols-4 w-full gap-1 h-auto p-1">
+          <TabsTrigger value="finances" aria-label="Finances" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
+            <Wallet className="w-4 h-4" aria-hidden="true" /> Finances
           </TabsTrigger>
-          <TabsTrigger value="payroll" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
-            <UsersIcon className="w-4 h-4" /> Payroll
+          <TabsTrigger value="payroll" aria-label="Payroll" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
+            <UsersIcon className="w-4 h-4" aria-hidden="true" /> Payroll
           </TabsTrigger>
-          <TabsTrigger value="inventory" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
-            <Package className="w-4 h-4" /> Inventory
+          <TabsTrigger value="inventory" aria-label="Inventory" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
+            <Package className="w-4 h-4" aria-hidden="true" /> Inventory
           </TabsTrigger>
-          <TabsTrigger value="insights" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
-            <Sparkles className="w-4 h-4" /> AI
+          <TabsTrigger value="insights" aria-label="AI Insights" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
+            <Sparkles className="w-4 h-4" aria-hidden="true" /> AI
           </TabsTrigger>
         </TabsList>
         <TabsContent value="finances" className="mt-4 sm:mt-6">
