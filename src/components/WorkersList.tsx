@@ -149,6 +149,9 @@ const WorkersList = ({ workers, loading, onRefresh }: WorkersListProps) => {
   if (loading) {
     return (
       <div className="space-y-3">
+        <span role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+          Loading workers…
+        </span>
         {[1, 2, 3].map((i) => (
           <Skeleton key={i} className="h-16 w-full" />
         ))}
