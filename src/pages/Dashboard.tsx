@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Sprout, LogOut, Settings, Briefcase, Wallet } from "lucide-react";
+import AppLogo from "@/components/AppLogo";
 import type { User } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import FarmSelector from "@/components/FarmSelector";
@@ -99,8 +100,8 @@ const Dashboard = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin">
-          <Sprout className="w-12 h-12 text-primary" />
+        <div className="animate-pulse">
+          <AppLogo className="w-16 h-16" />
         </div>
       </div>
     );
@@ -133,8 +134,8 @@ const Dashboard = () => {
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shrink-0">
-                <Sprout className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden shrink-0 ring-1 ring-border bg-card">
+                <AppLogo className="w-full h-full" />
               </div>
               <div className="min-w-0">
                 <h1 className="text-lg sm:text-xl font-bold">FarmSync</h1>
