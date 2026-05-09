@@ -71,8 +71,19 @@ const FarmInsights = ({ farmId }: Props) => {
           ? "text-accent-foreground"
           : "text-destructive";
 
+  const liveMessage = loading
+    ? insights
+      ? "Refreshing AI farm insights…"
+      : "Loading AI farm insights…"
+    : insights && generatedAt
+      ? `AI farm insights updated ${generatedAt.toLocaleTimeString()}.`
+      : "";
+
   return (
     <div className="space-y-4">
+      <span role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+        {liveMessage}
+      </span>
       <Card className="border-primary/30 bg-gradient-to-br from-primary/5 via-secondary/5 to-background">
         <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
           <div className="min-w-0">
