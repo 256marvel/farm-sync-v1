@@ -131,6 +131,7 @@ export type Database = {
           description: string | null
           farm_type: string
           id: string
+          image_url: string | null
           is_active: boolean | null
           location_district: string
           location_parish: string | null
@@ -148,6 +149,7 @@ export type Database = {
           description?: string | null
           farm_type: string
           id?: string
+          image_url?: string | null
           is_active?: boolean | null
           location_district: string
           location_parish?: string | null
@@ -165,6 +167,7 @@ export type Database = {
           description?: string | null
           farm_type?: string
           id?: string
+          image_url?: string | null
           is_active?: boolean | null
           location_district?: string
           location_parish?: string | null

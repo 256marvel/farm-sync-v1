@@ -188,8 +188,12 @@ const FarmSelector = ({ onFarmSelect, onCreateFarm }: FarmSelectorProps) => {
             >
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Sprout className="w-6 h-6 text-white" />
+                  <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform overflow-hidden shrink-0">
+                    {(farm as any).image_url ? (
+                      <img src={(farm as any).image_url} alt={farm.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <Sprout className="w-6 h-6 text-white" />
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-semibold px-3 py-1 rounded-full bg-secondary/10 text-secondary capitalize">

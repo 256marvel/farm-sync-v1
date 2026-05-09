@@ -14,6 +14,7 @@ import { Loader2 } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 import ConflictResolutionDialog, { type ConflictField } from "./ConflictResolutionDialog";
 import { recordConflict } from "@/lib/conflict-log";
+import FarmImageUpload from "./FarmImageUpload";
 
 type Farm = Database["public"]["Tables"]["farms"]["Row"];
 
@@ -39,6 +40,7 @@ interface EditFarmDialogProps {
 
 const EditFarmDialog = ({ open, onOpenChange, farm, onSuccess }: EditFarmDialogProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [baseUpdatedAt, setBaseUpdatedAt] = useState<string | null>(null);
   const [conflict, setConflict] = useState<{
     fields: ConflictField[];
@@ -66,6 +68,7 @@ const EditFarmDialog = ({ open, onOpenChange, farm, onSuccess }: EditFarmDialogP
   useEffect(() => {
     if (farm) {
       setBaseUpdatedAt(farm.updated_at);
+      setImageUrl((farm as any).image_url ?? null);
       form.reset({
         name: farm.name,
         farm_type: farm.farm_type as "layers" | "broilers" | "dual_purpose",
@@ -92,6 +95,7 @@ const EditFarmDialog = ({ open, onOpenChange, farm, onSuccess }: EditFarmDialogP
     bird_capacity: values.bird_capacity ? parseInt(values.bird_capacity) : null,
     start_date: values.start_date,
     description: values.description || null,
+    image_url: imageUrl,
   });
 
   /**
@@ -240,6 +244,17 @@ const EditFarmDialog = ({ open, onOpenChange, farm, onSuccess }: EditFarmDialogP
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {farm && (
+              <div className="rounded-xl border bg-muted/30 p-4">
+                <p className="text-sm font-medium mb-3">Farm profile image</p>
+                <FarmImageUpload
+                  farmId={farm.id}
+                  imageUrl={imageUrl}
+                  onChange={setImageUrl}
+                  size="md"
+                />
+              </div>
+            )}
             <FormField
               control={form.control}
               name="name"
