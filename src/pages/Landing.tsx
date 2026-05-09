@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Sprout, Users, TrendingUp, Shield, Smartphone, Globe } from "lucide-react";
+import AppLogo from "@/components/AppLogo";
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -52,7 +53,7 @@ const Landing = () => {
         <div className="relative container mx-auto px-4 py-20 md:py-32">
           <div className="max-w-4xl mx-auto text-center space-y-8 animate-slide-up">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 backdrop-blur-sm rounded-full border border-primary/20">
-              <Sprout className="w-4 h-4 text-primary" />
+              <AppLogo className="w-5 h-5" />
               <span className="text-sm font-medium text-primary">Uganda's #1 Poultry Management System</span>
             </div>
 
