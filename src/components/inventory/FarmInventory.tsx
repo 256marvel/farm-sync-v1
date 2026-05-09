@@ -73,8 +73,15 @@ const FarmInventory = ({ farmId, userId, canManage }: Props) => {
     [items],
   );
 
+  const inventoryLive = loading
+    ? "Loading inventory items…"
+    : `Inventory updated. ${items.length} item${items.length === 1 ? "" : "s"} loaded${lowStock.length ? `, ${lowStock.length} low on stock` : ""}.`;
+
   return (
     <div className="space-y-6">
+      <span role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+        {inventoryLive}
+      </span>
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between flex-wrap gap-3">
