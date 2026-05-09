@@ -69,8 +69,15 @@ const StaffDirectory = ({ farmId, viewerRole, title, description }: StaffDirecto
     [filtered, viewerRole],
   );
 
+  const directoryLive = loading
+    ? "Loading employee directory…"
+    : `${filtered.length} employee${filtered.length === 1 ? "" : "s"} shown.`;
+
   return (
     <Card>
+      <span role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+        {directoryLive}
+      </span>
       <CardHeader>
         <div className="flex items-start justify-between flex-wrap gap-3">
           <div>

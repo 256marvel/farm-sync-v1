@@ -134,13 +134,21 @@ const FarmDailyReports = ({ farmId }: Props) => {
   if (loading) {
     return (
       <div className="space-y-3">
+        <span role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+          Loading daily worker reports…
+        </span>
         {[1, 2, 3].map((i) => <Skeleton key={i} className="h-24 w-full" />)}
       </div>
     );
   }
 
+  const reportsLive = `Reports updated. ${eggs.length} egg, ${feed.length} feed, ${mortality.length} mortality, ${vacc.length} vaccination, and ${notes.length} note logs from the last 30 days. Live updates ${live ? "connected" : "connecting"}.`;
+
   return (
     <div className="space-y-4">
+      <span role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+        {reportsLive}
+      </span>
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-3 flex-wrap">

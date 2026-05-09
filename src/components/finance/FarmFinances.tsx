@@ -188,8 +188,15 @@ const FarmFinances = ({ farmId, userId, canDelete, canAdd = true }: Props) => {
     URL.revokeObjectURL(url);
   };
 
+  const financeLive = loading
+    ? "Loading farm transactions…"
+    : `Showing ${filtered.length} of ${items.length} transactions.`;
+
   return (
     <div className="space-y-6">
+      <span role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+        {financeLive}
+      </span>
       {/* This Month KPIs */}
       <Card>
         <CardHeader className="pb-3">

@@ -111,8 +111,19 @@ const SyncStatusPanel = ({ farmId }: SyncStatusPanelProps) => {
     0,
   );
 
+  const syncLive = syncing
+    ? "Syncing queued logs…"
+    : !online
+      ? "Offline. Changes will sync when reconnected."
+      : totalPending > 0
+        ? `${totalPending} log${totalPending === 1 ? "" : "s"} pending sync.`
+        : "All farms synced.";
+
   return (
     <Card className="border-border/50">
+      <span role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+        {syncLive}
+      </span>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div className="min-w-0">

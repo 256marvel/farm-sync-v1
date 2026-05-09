@@ -149,6 +149,9 @@ const WorkersList = ({ workers, loading, onRefresh }: WorkersListProps) => {
   if (loading) {
     return (
       <div className="space-y-3">
+        <span role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+          Loading workers…
+        </span>
         {[1, 2, 3].map((i) => (
           <Skeleton key={i} className="h-16 w-full" />
         ))}
@@ -172,6 +175,11 @@ const WorkersList = ({ workers, loading, onRefresh }: WorkersListProps) => {
 
   return (
     <>
+      <span role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+        {loading
+          ? "Loading workers…"
+          : `${filteredWorkers.length} of ${workers.length} workers shown.`}
+      </span>
       <div className="flex flex-col md:flex-row gap-3 mb-4">
         <div className="relative flex-1">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
