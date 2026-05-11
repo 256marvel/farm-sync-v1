@@ -9,10 +9,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import AppLogo from "@/components/AppLogo";
+import { useT } from "@/lib/i18n";
 
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const t = useT();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
