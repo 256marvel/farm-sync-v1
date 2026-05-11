@@ -13,6 +13,7 @@ import FarmInsights from "./insights/FarmInsights";
 import FarmDailyReports from "./staff/FarmDailyReports";
 import SyncStatusPanel from "./SyncStatusPanel";
 import { formatRole } from "@/lib/format";
+import { useT } from "@/lib/i18n";
 import type { FarmRole } from "@/hooks/use-farm-role";
 
 type Worker = Database["public"]["Tables"]["workers"]["Row"];
@@ -26,6 +27,7 @@ interface StaffDashboardProps {
 
 const StaffDashboard = ({ userId, role }: StaffDashboardProps) => {
   const { toast } = useToast();
+  const t = useT();
   const [worker, setWorker] = useState<Worker | null>(null);
   const [farm, setFarm] = useState<Farm | null>(null);
   const [stats, setStats] = useState({ active: 0, total: 0, monthTrays: 0, monthFeedKg: 0 });
@@ -62,7 +64,7 @@ const StaffDashboard = ({ userId, role }: StaffDashboardProps) => {
           monthFeedKg: (feed.data || []).reduce((s, r) => s + (Number(r.quantity_used_kg) || 0), 0),
         });
       } catch (e: any) {
-        toast({ title: "Error loading dashboard", description: e.message, variant: "destructive" });
+        toast({ title: t("Error loading dashboard"), description: e.message, variant: "destructive" });
       } finally {
         setLoading(false);
       }
@@ -77,19 +79,19 @@ const StaffDashboard = ({ userId, role }: StaffDashboardProps) => {
     );
   }
   if (!worker || !farm) {
-    return <div className="text-center py-12 text-muted-foreground">Unable to load dashboard.</div>;
+    return <div className="text-center py-12 text-muted-foreground">{t("Unable to load dashboard.")}</div>;
   }
 
   const titles: Record<string, string> = {
-    manager: "Manager Dashboard",
-    assistant_manager: "Assistant Manager Dashboard",
-    caretaker: "Caretaker Dashboard",
+    manager: t("Manager Dashboard"),
+    assistant_manager: t("Assistant Manager Dashboard"),
+    caretaker: t("Caretaker Dashboard"),
   };
 
   return (
     <div className="space-y-6 animate-slide-up">
       <div className="rounded-2xl bg-gradient-to-br from-primary/10 via-secondary/5 to-background border p-4 sm:p-6">
-        <h2 className="text-2xl sm:text-3xl font-bold mb-1">{titles[role] ?? "Staff Dashboard"}</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold mb-1">{titles[role] ?? t("Staff Dashboard")}</h2>
         <p className="text-sm sm:text-base text-muted-foreground">{farm.name} · {farm.location_district}</p>
         <Badge className="capitalize bg-primary/15 text-primary hover:bg-primary/20 mt-3">
           <Briefcase className="w-3 h-3 mr-1" /> {formatRole(worker.role)}
@@ -97,28 +99,28 @@ const StaffDashboard = ({ userId, role }: StaffDashboardProps) => {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-        <Stat icon={UsersIcon} label="Active Workers" value={`${stats.active} / ${stats.total}`} />
-        <Stat icon={Egg} label="Trays this month" value={stats.monthTrays.toLocaleString()} />
-        <Stat icon={Package} label="Feed kg this month" value={stats.monthFeedKg.toLocaleString()} />
-        <Stat icon={TrendingUp} label="Farm Capacity" value={(farm.bird_capacity ?? 0).toLocaleString()} />
+        <Stat icon={UsersIcon} label={t("Active Workers")} value={`${stats.active} / ${stats.total}`} />
+        <Stat icon={Egg} label={t("Trays this month")} value={stats.monthTrays.toLocaleString()} />
+        <Stat icon={Package} label={t("Feed kg this month")} value={stats.monthFeedKg.toLocaleString()} />
+        <Stat icon={TrendingUp} label={t("Farm Capacity")} value={(farm.bird_capacity ?? 0).toLocaleString()} />
       </div>
 
       <Tabs defaultValue="reports" className="w-full">
-        <TabsList aria-label="Dashboard sections" className="grid grid-cols-5 w-full gap-1 h-auto p-1">
-          <TabsTrigger value="reports" aria-label="Reports" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
-            <FileText className="w-4 h-4" aria-hidden="true" /> Reports
+        <TabsList aria-label={t("Dashboard sections")} className="grid grid-cols-5 w-full gap-1 h-auto p-1">
+          <TabsTrigger value="reports" aria-label={t("Reports")} className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
+            <FileText className="w-4 h-4" aria-hidden="true" /> {t("Reports")}
           </TabsTrigger>
-          <TabsTrigger value="team" aria-label="Team" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
-            <UsersIcon className="w-4 h-4" aria-hidden="true" /> Team
+          <TabsTrigger value="team" aria-label={t("Team")} className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
+            <UsersIcon className="w-4 h-4" aria-hidden="true" /> {t("Team")}
           </TabsTrigger>
-          <TabsTrigger value="finances" aria-label="Finances" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
-            <Wallet className="w-4 h-4" aria-hidden="true" /> Finances
+          <TabsTrigger value="finances" aria-label={t("Finances")} className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
+            <Wallet className="w-4 h-4" aria-hidden="true" /> {t("Finances")}
           </TabsTrigger>
-          <TabsTrigger value="inventory" aria-label="Inventory" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
-            <Package className="w-4 h-4" aria-hidden="true" /> Inventory
+          <TabsTrigger value="inventory" aria-label={t("Inventory")} className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
+            <Package className="w-4 h-4" aria-hidden="true" /> {t("Inventory")}
           </TabsTrigger>
-          <TabsTrigger value="insights" aria-label="AI Insights" className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
-            <Sparkles className="w-4 h-4" aria-hidden="true" /> AI
+          <TabsTrigger value="insights" aria-label={t("AI Insights")} className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 py-2 px-1 text-[11px] sm:text-sm">
+            <Sparkles className="w-4 h-4" aria-hidden="true" /> {t("AI")}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="reports" className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">

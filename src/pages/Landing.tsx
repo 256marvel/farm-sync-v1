@@ -2,41 +2,19 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Sprout, Users, TrendingUp, Shield, Smartphone, Globe } from "lucide-react";
 import AppLogo from "@/components/AppLogo";
+import { useT } from "@/lib/i18n";
 
 const Landing = () => {
   const navigate = useNavigate();
+  const t = useT();
 
   const features = [
-    {
-      icon: Users,
-      title: "Multi-Role Management",
-      description: "Owners, Managers, Caretakers, and Workers. All in one system",
-    },
-    {
-      icon: TrendingUp,
-      title: "Smart Analytics",
-      description: "AI-powered insights for poultry health and farm performance",
-    },
-    {
-      icon: Shield,
-      title: "Secure & Compliant",
-      description: "NIN validation and role-based access for maximum security",
-    },
-    {
-      icon: Smartphone,
-      title: "Works Offline",
-      description: "Record data anywhere, sync when you're back online",
-    },
-    {
-      icon: Globe,
-      title: "Multilingual",
-      description: "Full support for Luganda, Runyankole, Lusoga, and more",
-    },
-    {
-      icon: Sprout,
-      title: "Multi-Farm Ready",
-      description: "Manage multiple farms from a single dashboard",
-    },
+    { icon: Users, title: t("Multi-Role Management"), description: t("Owners, Managers, Caretakers, and Workers. All in one system") },
+    { icon: TrendingUp, title: t("Smart Analytics"), description: t("AI-powered insights for poultry health and farm performance") },
+    { icon: Shield, title: t("Secure & Compliant"), description: t("NIN validation and role-based access for maximum security") },
+    { icon: Smartphone, title: t("Works Offline"), description: t("Record data anywhere, sync when you're back online") },
+    { icon: Globe, title: t("Multilingual"), description: t("Full support for Luganda, Runyankole, Lusoga, and more") },
+    { icon: Sprout, title: t("Multi-Farm Ready"), description: t("Manage multiple farms from a single dashboard") },
   ];
 
   return (
@@ -54,15 +32,15 @@ const Landing = () => {
           <div className="max-w-4xl mx-auto text-center space-y-8 animate-slide-up">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 backdrop-blur-sm rounded-full border border-primary/20">
               <AppLogo className="w-5 h-5" />
-              <span className="text-sm font-medium text-primary">Uganda's #1 Poultry Management System</span>
+              <span className="text-sm font-medium text-primary">{t("Uganda's #1 Poultry Management System")}</span>
             </div>
 
             <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent leading-tight">
-              FarmSync
+              {t("FarmSync")}
             </h1>
 
             <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
-              The modern way to manage your poultry farm. Track production, manage teams, and grow smarter even when offline.
+              {t("The modern way to manage your poultry farm. Track production, manage teams, and grow smarter even when offline.")}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
@@ -71,7 +49,7 @@ const Landing = () => {
                 onClick={() => navigate("/auth")}
                 className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-white font-semibold px-8 py-6 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
               >
-                Get Started for Free
+                {t("Get Started for Free")}
               </Button>
               <Button
                 size="lg"
@@ -79,12 +57,12 @@ const Landing = () => {
                 onClick={() => navigate("/auth")}
                 className="border-2 border-primary/20 hover:border-primary/40 hover:bg-primary/5 px-8 py-6 text-lg rounded-xl"
               >
-                Sign In
+                {t("Sign In")}
               </Button>
             </div>
 
             <p className="text-sm text-muted-foreground">
-              No credit card required • Setup in 2 minutes • Free trial
+              {t("No credit card required • Setup in 2 minutes • Free trial")}
             </p>
           </div>
         </div>
@@ -95,11 +73,11 @@ const Landing = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16 space-y-4">
             <h2 className="text-3xl md:text-5xl font-bold">
-              Everything You Need to
-              <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"> Succeed</span>
+              {t("Everything You Need to")}
+              <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"> {t("Succeed")}</span>
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Built specifically for Ugandan Poultry Farmers with the features that matter most
+              {t("Built specifically for Ugandan Poultry Farmers with the features that matter most")}
             </p>
           </div>
 
@@ -127,17 +105,17 @@ const Landing = () => {
         <div className="container mx-auto px-4 relative">
           <div className="max-w-3xl mx-auto text-center space-y-8 p-12 rounded-3xl bg-card/50 backdrop-blur-sm border border-primary/20 shadow-2xl">
             <h2 className="text-3xl md:text-5xl font-bold">
-              Ready to Transform Your Farm?
+              {t("Ready to Transform Your Farm?")}
             </h2>
             <p className="text-lg text-muted-foreground">
-              Join hundreds of farmers across Uganda managing their poultry operations with FarmSync
+              {t("Join hundreds of farmers across Uganda managing their poultry operations with FarmSync")}
             </p>
             <Button
               size="lg"
               onClick={() => navigate("/auth")}
               className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-white font-semibold px-10 py-6 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
             >
-              Start Your Free Trial
+              {t("Start Your Free Trial")}
             </Button>
           </div>
         </div>
@@ -146,7 +124,7 @@ const Landing = () => {
       {/* Footer */}
       <footer className="py-8 border-t border-border">
         <div className="container mx-auto px-4 text-center text-muted-foreground">
-          <p>© 2025 FarmSync. Built for Ugandan Poultry Farmers.</p>
+          <p>{t("© 2025 FarmSync. Built for Ugandan Poultry Farmers.")}</p>
         </div>
       </footer>
     </div>

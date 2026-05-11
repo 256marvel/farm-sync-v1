@@ -9,10 +9,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import AppLogo from "@/components/AppLogo";
+import { useT } from "@/lib/i18n";
 
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const t = useT();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -40,14 +42,14 @@ const Auth = () => {
       if (error) throw error;
 
       toast({
-        title: "Account created!",
-        description: "Welcome to FarmSync. Redirecting to your dashboard...",
+        title: t("Account created!"),
+        description: t("Welcome to FarmSync. Redirecting to your dashboard..."),
       });
 
       setTimeout(() => navigate("/dashboard"), 1500);
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: t("Error"),
         description: error.message,
         variant: "destructive",
       });
@@ -81,8 +83,8 @@ const Auth = () => {
         if (workerRow && workerRow.is_active === false) {
           await supabase.auth.signOut();
           toast({
-            title: "Account deactivated",
-            description: "Your account has been deactivated. Please contact your farm owner.",
+            title: t("Account deactivated"),
+            description: t("Your account has been deactivated. Please contact your farm owner."),
             variant: "destructive",
           });
           setIsLoading(false);
@@ -91,15 +93,15 @@ const Auth = () => {
       }
 
       toast({
-        title: "Welcome back!",
-        description: "Redirecting to your dashboard...",
+        title: t("Welcome back!"),
+        description: t("Redirecting to your dashboard..."),
       });
 
       setTimeout(() => navigate("/dashboard"), 1000);
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Invalid credentials",
+        title: t("Error"),
+        description: error.message || t("Invalid credentials"),
         variant: "destructive",
       });
     } finally {
@@ -120,27 +122,27 @@ const Auth = () => {
             <AppLogo className="w-full h-full" />
           </div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            FarmSync
+            {t("FarmSync")}
           </h1>
-          <p className="text-muted-foreground mt-2">Manage your poultry farm with ease</p>
+          <p className="text-muted-foreground mt-2">{t("Manage your poultry farm with ease")}</p>
         </div>
 
         <Card className="border-primary/20 shadow-xl backdrop-blur-sm bg-card/95 animate-scale-in">
           <CardHeader>
-            <CardTitle>Get Started</CardTitle>
-            <CardDescription>Create an account or sign in to continue</CardDescription>
+            <CardTitle>{t("Get Started")}</CardTitle>
+            <CardDescription>{t("Create an account or sign in to continue")}</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="signin" className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="signin">Sign In</TabsTrigger>
-                <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                <TabsTrigger value="signin">{t("Sign In")}</TabsTrigger>
+                <TabsTrigger value="signup">{t("Sign Up")}</TabsTrigger>
               </TabsList>
 
               <TabsContent value="signin">
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signin-email">Email</Label>
+                    <Label htmlFor="signin-email">{t("Email")}</Label>
                     <Input
                       id="signin-email"
                       type="email"
@@ -152,7 +154,7 @@ const Auth = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signin-password">Password</Label>
+                    <Label htmlFor="signin-password">{t("Password")}</Label>
                     <div className="relative">
                       <Input
                         id="signin-password"
@@ -184,10 +186,10 @@ const Auth = () => {
                     {isLoading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Signing in...
+                        {t("Signing in...")}
                       </>
                     ) : (
-                      "Sign In"
+                      t("Sign In")
                     )}
                   </Button>
                 </form>
@@ -196,7 +198,7 @@ const Auth = () => {
               <TabsContent value="signup">
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name">Full Name</Label>
+                    <Label htmlFor="signup-name">{t("Full Name")}</Label>
                     <Input
                       id="signup-name"
                       type="text"
@@ -208,7 +210,7 @@ const Auth = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-phone">Phone Number</Label>
+                    <Label htmlFor="signup-phone">{t("Phone Number")}</Label>
                     <Input
                       id="signup-phone"
                       type="tel"
@@ -220,7 +222,7 @@ const Auth = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
+                    <Label htmlFor="signup-email">{t("Email")}</Label>
                     <Input
                       id="signup-email"
                       type="email"
@@ -232,7 +234,7 @@ const Auth = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
+                    <Label htmlFor="signup-password">{t("Password")}</Label>
                     <div className="relative">
                       <Input
                         id="signup-password"
@@ -265,10 +267,10 @@ const Auth = () => {
                     {isLoading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Creating account...
+                        {t("Creating account...")}
                       </>
                     ) : (
-                      "Create Account"
+                      t("Create Account")
                     )}
                   </Button>
                 </form>
@@ -283,7 +285,7 @@ const Auth = () => {
             onClick={() => navigate("/")}
             className="text-muted-foreground hover:text-foreground"
           >
-            ← Back to Home
+            ← {t("Back to Home")}
           </Button>
         </div>
       </div>
