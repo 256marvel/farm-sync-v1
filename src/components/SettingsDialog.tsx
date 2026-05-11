@@ -96,9 +96,9 @@ const SettingsDialog = ({ open, onOpenChange, user }: SettingsDialogProps) => {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Account Settings</DialogTitle>
+          <DialogTitle className="text-2xl">{t("Account Settings")}</DialogTitle>
           <DialogDescription>
-            Update your profile information and password
+            {t("Update your profile information and password")}
           </DialogDescription>
         </DialogHeader>
 
@@ -106,7 +106,7 @@ const SettingsDialog = ({ open, onOpenChange, user }: SettingsDialogProps) => {
           <div className="space-y-2">
             <Label htmlFor="email" className="flex items-center gap-2">
               <User className="w-4 h-4" />
-              Email
+              {t("Email")}
             </Label>
             <Input
               id="email"
@@ -115,48 +115,68 @@ const SettingsDialog = ({ open, onOpenChange, user }: SettingsDialogProps) => {
               disabled
               className="bg-muted"
             />
-            <p className="text-xs text-muted-foreground">Email cannot be changed</p>
+            <p className="text-xs text-muted-foreground">{t("Email cannot be changed")}</p>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="fullName" className="flex items-center gap-2">
               <User className="w-4 h-4" />
-              Full Name
+              {t("Full Name")}
             </Label>
             <Input
               id="fullName"
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              placeholder="Enter your full name"
+              placeholder={t("Enter your full name")}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="language" className="flex items-center gap-2">
+              <Languages className="w-4 h-4" />
+              {t("Language")}
+            </Label>
+            <Select value={lang} onValueChange={(v) => setLang(v as LanguageCode)}>
+              <SelectTrigger id="language">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {LANGUAGES.map((l) => (
+                  <SelectItem key={l.code} value={l.code}>
+                    {l.native} {l.code !== "en" && <span className="text-muted-foreground text-xs">· {l.label}</span>}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">{t("Choose your preferred language")}</p>
           </div>
 
           <div className="border-t pt-4 space-y-4">
             <h3 className="text-sm font-semibold flex items-center gap-2">
               <Lock className="w-4 h-4" />
-              Change Password
+              {t("Change Password")}
             </h3>
             
             <div className="space-y-2">
-              <Label htmlFor="newPassword">New Password</Label>
+              <Label htmlFor="newPassword">{t("New Password")}</Label>
               <Input
                 id="newPassword"
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Enter new password"
+                placeholder={t("Enter new password")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="confirmPassword">{t("Confirm Password")}</Label>
               <Input
                 id="confirmPassword"
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm new password"
+                placeholder={t("Confirm new password")}
               />
             </div>
           </div>
@@ -168,7 +188,7 @@ const SettingsDialog = ({ open, onOpenChange, user }: SettingsDialogProps) => {
             onClick={() => onOpenChange(false)}
             disabled={isUpdating}
           >
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button
             onClick={handleUpdateProfile}
@@ -176,7 +196,7 @@ const SettingsDialog = ({ open, onOpenChange, user }: SettingsDialogProps) => {
             className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-white"
           >
             {isUpdating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            Save Changes
+            {t("Save Changes")}
           </Button>
         </div>
       </DialogContent>
