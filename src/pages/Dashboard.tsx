@@ -16,6 +16,7 @@ import StaffDashboard from "@/components/StaffDashboard";
 import AccountantDashboard from "@/components/AccountantDashboard";
 import OfflineSyncIndicator from "@/components/OfflineSyncIndicator";
 import SyncStatusPanel from "@/components/SyncStatusPanel";
+import { useT } from "@/lib/i18n";
 
 type Farm = Database["public"]["Tables"]["farms"]["Row"];
 type WorkerRole = Database["public"]["Enums"]["worker_role"];
@@ -24,6 +25,7 @@ type DualView = "manager" | "accountant";
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const t = useT();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedFarm, setSelectedFarm] = useState<Farm | null>(null);
@@ -46,8 +48,8 @@ const Dashboard = () => {
       if (workerData && workerData.is_active === false) {
         await supabase.auth.signOut();
         toast({
-          title: "Account deactivated",
-          description: "Your account has been deactivated. Please contact your farm owner.",
+          title: t("Account deactivated"),
+          description: t("Your account has been deactivated. Please contact your farm owner."),
           variant: "destructive",
         });
         navigate("/auth");
@@ -86,10 +88,10 @@ const Dashboard = () => {
   const handleSignOut = async () => {
     try {
       await supabase.auth.signOut();
-      toast({ title: "Signed out successfully", description: "See you soon!" });
+      toast({ title: t("Signed out successfully"), description: t("See you soon!") });
       navigate("/");
     } catch (error: any) {
-      toast({ title: "Error signing out", description: error.message, variant: "destructive" });
+      toast({ title: t("Error signing out"), description: error.message, variant: "destructive" });
     }
   };
 
@@ -138,7 +140,7 @@ const Dashboard = () => {
                 <AppLogo className="w-full h-full" />
               </div>
               <div className="min-w-0">
-                <h1 className="text-lg sm:text-xl font-bold">FarmSync</h1>
+                <h1 className="text-lg sm:text-xl font-bold">{t("FarmSync")}</h1>
                 <p className="text-xs text-muted-foreground truncate max-w-[180px] sm:max-w-none">
                   {user?.user_metadata?.full_name || user?.email}
                 </p>
@@ -159,7 +161,7 @@ const Dashboard = () => {
                     aria-pressed={dualView === "manager"}
                   >
                     <Briefcase className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Manager</span>
+                    <span className="hidden sm:inline">{t("Manager")}</span>
                   </button>
                   <button
                     type="button"
@@ -172,7 +174,7 @@ const Dashboard = () => {
                     aria-pressed={dualView === "accountant"}
                   >
                     <Wallet className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Accountant</span>
+                    <span className="hidden sm:inline">{t("Accountant")}</span>
                   </button>
                 </div>
               )}
@@ -196,9 +198,9 @@ const Dashboard = () => {
           <>
             <div className="mb-8 animate-slide-up">
               <h2 className="text-3xl font-bold mb-2">
-                Welcome back, {user?.user_metadata?.full_name?.split(" ")[0] || "Farmer"}! 👋
+                {t("Welcome back")}, {user?.user_metadata?.full_name?.split(" ")[0] || t("Farmer")}! 👋
               </h2>
-              <p className="text-muted-foreground">Manage your farms and track operations</p>
+              <p className="text-muted-foreground">{t("Manage your farms and track operations")}</p>
             </div>
 
             <FarmSelector
