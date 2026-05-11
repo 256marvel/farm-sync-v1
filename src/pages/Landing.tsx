@@ -9,36 +9,12 @@ const Landing = () => {
   const t = useT();
 
   const features = [
-    {
-      icon: Users,
-      title: "Multi-Role Management",
-      description: "Owners, Managers, Caretakers, and Workers. All in one system",
-    },
-    {
-      icon: TrendingUp,
-      title: "Smart Analytics",
-      description: "AI-powered insights for poultry health and farm performance",
-    },
-    {
-      icon: Shield,
-      title: "Secure & Compliant",
-      description: "NIN validation and role-based access for maximum security",
-    },
-    {
-      icon: Smartphone,
-      title: "Works Offline",
-      description: "Record data anywhere, sync when you're back online",
-    },
-    {
-      icon: Globe,
-      title: "Multilingual",
-      description: "Full support for Luganda, Runyankole, Lusoga, and more",
-    },
-    {
-      icon: Sprout,
-      title: "Multi-Farm Ready",
-      description: "Manage multiple farms from a single dashboard",
-    },
+    { icon: Users, title: t("Multi-Role Management"), description: t("Owners, Managers, Caretakers, and Workers. All in one system") },
+    { icon: TrendingUp, title: t("Smart Analytics"), description: t("AI-powered insights for poultry health and farm performance") },
+    { icon: Shield, title: t("Secure & Compliant"), description: t("NIN validation and role-based access for maximum security") },
+    { icon: Smartphone, title: t("Works Offline"), description: t("Record data anywhere, sync when you're back online") },
+    { icon: Globe, title: t("Multilingual"), description: t("Full support for Luganda, Runyankole, Lusoga, and more") },
+    { icon: Sprout, title: t("Multi-Farm Ready"), description: t("Manage multiple farms from a single dashboard") },
   ];
 
   return (
