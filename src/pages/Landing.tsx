@@ -2,9 +2,11 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Sprout, Users, TrendingUp, Shield, Smartphone, Globe } from "lucide-react";
 import AppLogo from "@/components/AppLogo";
+import { useT } from "@/lib/i18n";
 
 const Landing = () => {
   const navigate = useNavigate();
+  const t = useT();
 
   const features = [
     {
