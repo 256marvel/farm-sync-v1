@@ -285,7 +285,7 @@ const Auth = () => {
             onClick={() => navigate("/")}
             className="text-muted-foreground hover:text-foreground"
           >
-            ← {t("Back to Home") === "Back to Home" ? "Back to Home" : t("Back to Home")}
+            ← {t("Back to Home")}
           </Button>
         </div>
       </div>

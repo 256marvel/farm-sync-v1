@@ -28,6 +28,7 @@ const sw: Dict = {
   "Get Started": "Anza",
   "Create an account or sign in to continue": "Tengeneza akaunti au ingia ili kuendelea",
   "← Back to Home": "← Rudi Mwanzo",
+  "Back to Home": "Rudi Mwanzo",
   "Email": "Barua pepe",
   "Password": "Nenosiri",
   "New Password": "Nenosiri Jipya",
