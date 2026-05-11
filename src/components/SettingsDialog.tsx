@@ -6,7 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, User, Lock } from "lucide-react";
+import { Loader2, User, Lock, Languages } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useI18n, LANGUAGES, type LanguageCode } from "@/lib/i18n";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 interface SettingsDialogProps {
@@ -22,6 +24,7 @@ const SettingsDialog = ({ open, onOpenChange, user }: SettingsDialogProps) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { t, lang, setLang } = useI18n();
 
   const handleUpdateProfile = async () => {
     setIsUpdating(true);
