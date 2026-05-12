@@ -49,6 +49,7 @@ import {
   type TxKind,
 } from "@/lib/finance";
 import AddTransactionDialog from "./AddTransactionDialog";
+import { useT } from "@/lib/i18n";
 
 interface Props {
   farmId: string;
@@ -63,6 +64,7 @@ const KIND_FILTERS: ("all" | TxKind)[] = ["all", "income", "expense", "loss"];
 
 const FarmFinances = ({ farmId, userId, canDelete, canAdd = true }: Props) => {
   const { toast } = useToast();
+  const t = useT();
   const [items, setItems] = useState<FarmTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [openAdd, setOpenAdd] = useState(false);
@@ -85,7 +87,7 @@ const FarmFinances = ({ farmId, userId, canDelete, canAdd = true }: Props) => {
         .order("created_at", { ascending: false });
       if (!cancelled) {
         if (error) {
-          toast({ title: "Error loading finances", description: error.message, variant: "destructive" });
+          toast({ title: t("Error loading finances"), description: error.message, variant: "destructive" });
         } else {
           setItems(data || []);
         }
@@ -157,9 +159,9 @@ const FarmFinances = ({ farmId, userId, canDelete, canAdd = true }: Props) => {
     if (!pendingDelete) return;
     const { error } = await supabase.from("farm_transactions").delete().eq("id", pendingDelete.id);
     if (error) {
-      toast({ title: "Could not delete", description: error.message, variant: "destructive" });
+      toast({ title: t("Could not delete"), description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "Deleted", description: "Transaction removed." });
+      toast({ title: t("Deleted"), description: t("Transaction removed.") });
       setRefreshKey((k) => k + 1);
     }
     setPendingDelete(null);
@@ -189,8 +191,8 @@ const FarmFinances = ({ farmId, userId, canDelete, canAdd = true }: Props) => {
   };
 
   const financeLive = loading
-    ? "Loading farm transactions…"
-    : `Showing ${filtered.length} of ${items.length} transactions.`;
+    ? t("Loading farm transactions…")
+    : `${t("Showing")} ${filtered.length} ${t("of")} ${items.length} ${t("transactions.")}`;
 
   return (
     <div className="space-y-6">
@@ -202,19 +204,19 @@ const FarmFinances = ({ farmId, userId, canDelete, canAdd = true }: Props) => {
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
-              <CardTitle className="text-lg sm:text-xl">{thisMonth.label} Summary</CardTitle>
-              <CardDescription>Live totals for the current calendar month</CardDescription>
+              <CardTitle className="text-lg sm:text-xl">{thisMonth.label} {t("Summary")}</CardTitle>
+              <CardDescription>{t("Live totals for the current calendar month")}</CardDescription>
             </div>
             {canAdd && (
               <div className="flex gap-2 flex-wrap">
                 <Button size="sm" variant="outline" onClick={() => handleAddClick("income")} className="border-secondary/40 text-secondary hover:bg-secondary/10">
-                  <Plus className="w-4 h-4 mr-1" /> Income
+                  <Plus className="w-4 h-4 mr-1" /> {t("Income")}
                 </Button>
                 <Button size="sm" variant="outline" onClick={() => handleAddClick("expense")} className="border-destructive/40 text-destructive hover:bg-destructive/10">
-                  <Plus className="w-4 h-4 mr-1" /> Expense
+                  <Plus className="w-4 h-4 mr-1" /> {t("Expense")}
                 </Button>
                 <Button size="sm" variant="outline" onClick={() => handleAddClick("loss")} className="border-amber-500/40 text-amber-600 hover:bg-amber-500/10 dark:text-amber-400">
-                  <Plus className="w-4 h-4 mr-1" /> Loss
+                  <Plus className="w-4 h-4 mr-1" /> {t("Loss")}
                 </Button>
               </div>
             )}
@@ -222,12 +224,12 @@ const FarmFinances = ({ farmId, userId, canDelete, canAdd = true }: Props) => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <KpiTile icon={TrendingUp} label="Income" value={formatUGX(thisMonth.income)} tone="secondary" />
-            <KpiTile icon={TrendingDown} label="Expenses" value={formatUGX(thisMonth.expense)} tone="destructive" />
-            <KpiTile icon={AlertTriangle} label="Losses" value={formatUGX(thisMonth.loss)} tone="amber" />
+            <KpiTile icon={TrendingUp} label={t("Income")} value={formatUGX(thisMonth.income)} tone="secondary" />
+            <KpiTile icon={TrendingDown} label={t("Expenses")} value={formatUGX(thisMonth.expense)} tone="destructive" />
+            <KpiTile icon={AlertTriangle} label={t("Losses")} value={formatUGX(thisMonth.loss)} tone="amber" />
             <KpiTile
               icon={Wallet}
-              label="Net Profit"
+              label={t("Net Profit")}
               value={formatUGX(thisMonth.net)}
               tone={thisMonth.net >= 0 ? "primary" : "destructive"}
               highlight
@@ -242,17 +244,17 @@ const FarmFinances = ({ farmId, userId, canDelete, canAdd = true }: Props) => {
           <div className="flex items-start justify-between flex-wrap gap-3">
             <div>
               <CardTitle className="text-lg flex items-center gap-2">
-                <Receipt className="w-5 h-5" /> Transactions
+                <Receipt className="w-5 h-5" /> {t("Transactions")}
               </CardTitle>
               <CardDescription>
-                {filtered.length} of {items.length} entries · Net for selection:{" "}
+                {filtered.length} {t("of")} {items.length} {t("entries · Net for selection:")}{" "}
                 <span className={totals.net >= 0 ? "text-secondary font-semibold" : "text-destructive font-semibold"}>
                   {formatUGX(totals.net)}
                 </span>
               </CardDescription>
             </div>
             <Button variant="outline" size="sm" onClick={exportCsv} disabled={!filtered.length}>
-              <Download className="w-4 h-4 mr-1" /> Export CSV
+              <Download className="w-4 h-4 mr-1" /> {t("Export CSV")}
             </Button>
           </div>
         </CardHeader>
@@ -261,7 +263,7 @@ const FarmFinances = ({ farmId, userId, canDelete, canAdd = true }: Props) => {
             <div className="relative sm:col-span-1">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search description, reference..."
+                placeholder={t("Search description, reference...")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9"
@@ -274,17 +276,17 @@ const FarmFinances = ({ farmId, userId, canDelete, canAdd = true }: Props) => {
               <SelectContent>
                 {KIND_FILTERS.map((k) => (
                   <SelectItem key={k} value={k} className="capitalize">
-                    {k === "all" ? "All types" : KIND_META[k].label}
+                    {k === "all" ? t("All types") : KIND_META[k].label}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <Select value={monthFilter} onValueChange={setMonthFilter}>
               <SelectTrigger>
-                <SelectValue placeholder="All months" />
+                <SelectValue placeholder={t("All months")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All months</SelectItem>
+                <SelectItem value="all">{t("All months")}</SelectItem>
                 {monthOptions.map((m) => (
                   <SelectItem key={m} value={m}>
                     {monthLabel(m)}
@@ -296,17 +298,17 @@ const FarmFinances = ({ farmId, userId, canDelete, canAdd = true }: Props) => {
 
           {/* Selection totals (visible on small + large) */}
           <div className="grid grid-cols-3 gap-2 mb-4">
-            <MiniTotal label="Income" value={totals.income} tone="secondary" />
-            <MiniTotal label="Expenses" value={totals.expense} tone="destructive" />
-            <MiniTotal label="Losses" value={totals.loss} tone="amber" />
+            <MiniTotal label={t("Income")} value={totals.income} tone="secondary" />
+            <MiniTotal label={t("Expenses")} value={totals.expense} tone="destructive" />
+            <MiniTotal label={t("Losses")} value={totals.loss} tone="amber" />
           </div>
 
           {loading ? (
-            <div className="py-10 text-center text-muted-foreground">Loading transactions...</div>
+            <div className="py-10 text-center text-muted-foreground">{t("Loading transactions...")}</div>
           ) : filtered.length === 0 ? (
             <div className="py-10 text-center text-muted-foreground">
               <Receipt className="w-10 h-10 mx-auto mb-2 opacity-50" />
-              <p>No transactions yet. Click an Add button above to record your first entry.</p>
+              <p>{t("No transactions yet. Click an Add button above to record your first entry.")}</p>
             </div>
           ) : (
             <>
@@ -351,12 +353,12 @@ const FarmFinances = ({ farmId, userId, canDelete, canAdd = true }: Props) => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead>Method</TableHead>
-                      <TableHead className="text-right">Amount</TableHead>
+                      <TableHead>{t("Date")}</TableHead>
+                      <TableHead>{t("Type")}</TableHead>
+                      <TableHead>{t("Category")}</TableHead>
+                      <TableHead>{t("Description")}</TableHead>
+                      <TableHead>{t("Method")}</TableHead>
+                      <TableHead className="text-right">{t("Amount")}</TableHead>
                       {canDelete && <TableHead className="w-12"></TableHead>}
                     </TableRow>
                   </TableHeader>
@@ -407,8 +409,8 @@ const FarmFinances = ({ farmId, userId, canDelete, canAdd = true }: Props) => {
       {breakdownByCategory.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Breakdown by Category</CardTitle>
-            <CardDescription>For the current filter selection</CardDescription>
+            <CardTitle className="text-lg">{t("Breakdown by Category")}</CardTitle>
+            <CardDescription>{t("For the current filter selection")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">

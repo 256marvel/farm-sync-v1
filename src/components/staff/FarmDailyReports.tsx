@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Egg, Package, HeartCrack, Syringe, FileText, Wifi } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useT } from "@/lib/i18n";
 
 interface Props {
   farmId: string;
@@ -23,6 +24,7 @@ const fmtTime = (d: string) => new Date(d).toLocaleTimeString([], { hour: "2-dig
 
 const FarmDailyReports = ({ farmId }: Props) => {
   const { toast } = useToast();
+  const t = useT();
   const [loading, setLoading] = useState(true);
   const [workers, setWorkers] = useState<Record<string, string>>({});
   const [eggs, setEggs] = useState<AnyRow[]>([]);
@@ -65,7 +67,7 @@ const FarmDailyReports = ({ farmId }: Props) => {
       try {
         await fetchAll();
       } catch (err: any) {
-        toast({ title: "Couldn't load reports", description: err.message, variant: "destructive" });
+        toast({ title: t("Couldn't load reports"), description: err.message, variant: "destructive" });
       } finally {
         if (active) setLoading(false);
       }
@@ -135,7 +137,7 @@ const FarmDailyReports = ({ farmId }: Props) => {
     return (
       <div className="space-y-3">
         <span role="status" aria-live="polite" aria-atomic="true" className="sr-only">
-          Loading daily worker reports…
+          {t("Loading daily worker reports…")}
         </span>
         {[1, 2, 3].map((i) => <Skeleton key={i} className="h-24 w-full" />)}
       </div>
@@ -154,33 +156,33 @@ const FarmDailyReports = ({ farmId }: Props) => {
           <div className="flex items-start justify-between gap-3 flex-wrap">
             <div className="min-w-0">
               <CardTitle className="text-xl sm:text-2xl flex items-center gap-2">
-                <FileText className="w-5 h-5 text-primary" /> Daily Worker Reports
+                <FileText className="w-5 h-5 text-primary" /> {t("Daily Worker Reports")}
               </CardTitle>
               <CardDescription>
-                Live feed of operational logs from your team — updates instantly when workers submit data.
+                {t("Live feed of operational logs from your team — updates instantly when workers submit data.")}
               </CardDescription>
             </div>
             <Badge variant={live ? "default" : "secondary"} className="shrink-0">
               <Wifi className={`w-3 h-3 mr-1 ${live ? "animate-pulse" : ""}`} />
-              {live ? "Live" : "Connecting…"}
+              {live ? t("Live") : t("Connecting…")}
             </Badge>
           </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-4">
-            <Stat icon={Egg} label="Trays today" value={totals.eggsToday.toLocaleString()} />
-            <Stat icon={Package} label="Feed kg today" value={totals.feedToday.toLocaleString()} />
-            <Stat icon={HeartCrack} label="Deaths today" value={totals.deathsToday.toLocaleString()} />
-            <Stat icon={Syringe} label="Vaccinations today" value={totals.vaccsToday.toLocaleString()} />
+            <Stat icon={Egg} label={t("Trays today")} value={totals.eggsToday.toLocaleString()} />
+            <Stat icon={Package} label={t("Feed kg today")} value={totals.feedToday.toLocaleString()} />
+            <Stat icon={HeartCrack} label={t("Deaths today")} value={totals.deathsToday.toLocaleString()} />
+            <Stat icon={Syringe} label={t("Vaccinations today")} value={totals.vaccsToday.toLocaleString()} />
           </div>
 
           <Tabs defaultValue="eggs" className="w-full">
             <TabsList className="grid grid-cols-3 sm:grid-cols-5 w-full sm:w-auto sm:inline-flex gap-1">
-              <TabsTrigger value="eggs"><Egg className="w-3.5 h-3.5 mr-1" />Eggs</TabsTrigger>
-              <TabsTrigger value="feed"><Package className="w-3.5 h-3.5 mr-1" />Feed</TabsTrigger>
-              <TabsTrigger value="mortality"><HeartCrack className="w-3.5 h-3.5 mr-1" />Mortality</TabsTrigger>
-              <TabsTrigger value="vacc"><Syringe className="w-3.5 h-3.5 mr-1" />Vaccines</TabsTrigger>
-              <TabsTrigger value="notes"><FileText className="w-3.5 h-3.5 mr-1" />Notes</TabsTrigger>
+              <TabsTrigger value="eggs"><Egg className="w-3.5 h-3.5 mr-1" />{t("Eggs")}</TabsTrigger>
+              <TabsTrigger value="feed"><Package className="w-3.5 h-3.5 mr-1" />{t("Feed")}</TabsTrigger>
+              <TabsTrigger value="mortality"><HeartCrack className="w-3.5 h-3.5 mr-1" />{t("Mortality")}</TabsTrigger>
+              <TabsTrigger value="vacc"><Syringe className="w-3.5 h-3.5 mr-1" />{t("Vaccines")}</TabsTrigger>
+              <TabsTrigger value="notes"><FileText className="w-3.5 h-3.5 mr-1" />{t("Notes")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="eggs" className="mt-4">
@@ -189,10 +191,10 @@ const FarmDailyReports = ({ farmId }: Props) => {
                   who={workerName(r.worker_id)}
                   when={r.date}
                   created={r.created_at}
-                  primary={`${r.trays_collected} trays · ${r.eggs_per_tray}/tray`}
-                  secondary={`${r.damaged_eggs ?? 0} damaged eggs · ${r.damaged_trays ?? 0} damaged trays`}
+                  primary={`${r.trays_collected} ${t("trays")} · ${r.eggs_per_tray}/${t("tray")}`}
+                  secondary={`${r.damaged_eggs ?? 0} ${t("damaged eggs")} · ${r.damaged_trays ?? 0} ${t("damaged trays")}`}
                 />
-              )} empty="No egg production logs in the last 30 days." />
+              )} empty={t("No egg production logs in the last 30 days.")} />
             </TabsContent>
 
             <TabsContent value="feed" className="mt-4">
@@ -202,9 +204,9 @@ const FarmDailyReports = ({ farmId }: Props) => {
                   when={r.date}
                   created={r.created_at}
                   primary={`${r.quantity_used_kg} kg ${r.feed_type}`}
-                  secondary={`Stock left: ${r.remaining_stock_kg} kg`}
+                  secondary={`${t("Stock left")}: ${r.remaining_stock_kg} kg`}
                 />
-              )} empty="No feed usage logs in the last 30 days." />
+              )} empty={t("No feed usage logs in the last 30 days.")} />
             </TabsContent>
 
             <TabsContent value="mortality" className="mt-4">
@@ -213,11 +215,11 @@ const FarmDailyReports = ({ farmId }: Props) => {
                   who={workerName(r.worker_id)}
                   when={r.date}
                   created={r.created_at}
-                  primary={`${r.number_dead} bird(s) · age ${r.age_weeks}w`}
-                  secondary={`Cause: ${r.suspected_cause}`}
+                  primary={`${r.number_dead} ${t("bird(s)")} · ${t("age")} ${r.age_weeks}w`}
+                  secondary={`${t("Cause")}: ${r.suspected_cause}`}
                   destructive
                 />
-              )} empty="No mortality logs in the last 30 days." />
+              )} empty={t("No mortality logs in the last 30 days.")} />
             </TabsContent>
 
             <TabsContent value="vacc" className="mt-4">
@@ -226,10 +228,10 @@ const FarmDailyReports = ({ farmId }: Props) => {
                   who={workerName(r.worker_id)}
                   when={r.date}
                   created={r.created_at}
-                  primary={`${r.vaccine_name} · ${r.birds_vaccinated} birds`}
-                  secondary={`Administered by ${r.administered_by}`}
+                  primary={`${r.vaccine_name} · ${r.birds_vaccinated} ${t("birds")}`}
+                  secondary={`${t("Administered by")} ${r.administered_by}`}
                 />
-              )} empty="No vaccination logs in the last 30 days." />
+              )} empty={t("No vaccination logs in the last 30 days.")} />
             </TabsContent>
 
             <TabsContent value="notes" className="mt-4">
@@ -240,7 +242,7 @@ const FarmDailyReports = ({ farmId }: Props) => {
                   created={r.created_at}
                   primary={r.notes}
                 />
-              )} empty="No notes in the last 30 days." />
+              )} empty={t("No notes in the last 30 days.")} />
             </TabsContent>
           </Tabs>
         </CardContent>

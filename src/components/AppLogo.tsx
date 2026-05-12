@@ -1,4 +1,4 @@
-import logo from "@/assets/farmsync-logo.webp";
+import logo from "@/assets/farmsync-logo.png";
 import { cn } from "@/lib/utils";
 
 interface AppLogoProps {

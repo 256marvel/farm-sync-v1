@@ -10,6 +10,7 @@ import { Lock, Phone, Search, User as UserIcon, Users as UsersIcon, Home } from 
 import type { Database } from "@/integrations/supabase/types";
 import { canSeeSalary, type FarmRole } from "@/hooks/use-farm-role";
 import { formatRole, formatUGX } from "@/lib/format";
+import { useT } from "@/lib/i18n";
 
 type Worker = Database["public"]["Tables"]["workers"]["Row"];
 
@@ -24,6 +25,7 @@ interface StaffDirectoryProps {
 const ROLE_FILTERS = ["all", "worker", "caretaker", "manager", "assistant_manager", "accountant"] as const;
 
 const StaffDirectory = ({ farmId, viewerRole, title, description }: StaffDirectoryProps) => {
+  const t = useT();
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -70,8 +72,8 @@ const StaffDirectory = ({ farmId, viewerRole, title, description }: StaffDirecto
   );
 
   const directoryLive = loading
-    ? "Loading employee directory…"
-    : `${filtered.length} employee${filtered.length === 1 ? "" : "s"} shown.`;
+    ? t("Loading employee directory…")
+    : `${filtered.length} ${filtered.length === 1 ? t("employee shown.") : t("employees shown.")}`;
 
   return (
     <Card>
@@ -83,15 +85,15 @@ const StaffDirectory = ({ farmId, viewerRole, title, description }: StaffDirecto
           <div>
             <CardTitle className="flex items-center gap-2">
               <UsersIcon className="w-5 h-5" />
-              {title ?? "Employee Directory"}
+              {title ?? t("Employee Directory")}
             </CardTitle>
             <CardDescription>
-              {description ?? "All active staff at this farm with their assignments."}
+              {description ?? t("All active staff at this farm with their assignments.")}
             </CardDescription>
           </div>
           {(viewerRole === "owner" || viewerRole === "accountant") && totalPayroll > 0 && (
             <div className="text-right">
-              <p className="text-xs text-muted-foreground">Visible monthly payroll</p>
+              <p className="text-xs text-muted-foreground">{t("Visible monthly payroll")}</p>
               <p className="text-lg font-bold text-primary">{formatUGX(totalPayroll)}</p>
             </div>
           )}
@@ -102,7 +104,7 @@ const StaffDirectory = ({ farmId, viewerRole, title, description }: StaffDirecto
           <div className="relative flex-1">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search name, role, house..."
+              placeholder={t("Search name, role, house...")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
@@ -115,7 +117,7 @@ const StaffDirectory = ({ farmId, viewerRole, title, description }: StaffDirecto
             <SelectContent>
               {ROLE_FILTERS.map((r) => (
                 <SelectItem key={r} value={r} className="capitalize">
-                  {r === "all" ? "All roles" : formatRole(r)}
+                  {r === "all" ? t("All roles") : formatRole(r)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -129,18 +131,18 @@ const StaffDirectory = ({ farmId, viewerRole, title, description }: StaffDirecto
         ) : filtered.length === 0 ? (
           <div className="text-center py-10 text-muted-foreground">
             <UsersIcon className="w-10 h-10 mx-auto mb-2 opacity-50" />
-            <p>No employees match your filters.</p>
+            <p>{t("No employees match your filters.")}</p>
           </div>
         ) : (
           <div className="rounded-lg border overflow-hidden">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Employee</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>House / Job Area</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead className="text-right">Monthly Salary</TableHead>
+                  <TableHead>{t("Employee")}</TableHead>
+                  <TableHead>{t("Role")}</TableHead>
+                  <TableHead>{t("House / Job Area")}</TableHead>
+                  <TableHead>{t("Contact")}</TableHead>
+                  <TableHead className="text-right">{t("Monthly Salary")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -155,7 +157,7 @@ const StaffDirectory = ({ farmId, viewerRole, title, description }: StaffDirecto
                           </div>
                           <div>
                             <p className="font-medium">{w.full_name}</p>
-                            <p className="text-xs text-muted-foreground">{w.gender} · {w.age} yrs</p>
+                            <p className="text-xs text-muted-foreground">{w.gender} · {w.age} {t("yrs")}</p>
                           </div>
                         </div>
                       </TableCell>
@@ -169,7 +171,7 @@ const StaffDirectory = ({ farmId, viewerRole, title, description }: StaffDirecto
                             {w.house_assignment}
                           </div>
                         ) : (
-                          <span className="text-muted-foreground text-sm">Unassigned</span>
+                          <span className="text-muted-foreground text-sm">{t("Unassigned")}</span>
                         )}
                       </TableCell>
                       <TableCell>
@@ -187,11 +189,11 @@ const StaffDirectory = ({ farmId, viewerRole, title, description }: StaffDirecto
                           w.monthly_salary != null ? (
                             <span className="font-semibold">{formatUGX(Number(w.monthly_salary))}</span>
                           ) : (
-                            <span className="text-muted-foreground text-sm">Not set</span>
+                            <span className="text-muted-foreground text-sm">{t("Not set")}</span>
                           )
                         ) : (
                           <span className="inline-flex items-center gap-1 text-muted-foreground text-sm">
-                            <Lock className="w-3 h-3" /> Restricted
+                            <Lock className="w-3 h-3" /> {t("Restricted")}
                           </span>
                         )}
                       </TableCell>
