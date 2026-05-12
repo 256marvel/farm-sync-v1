@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { Sparkles, RefreshCw, AlertTriangle, CheckCircle2, Lightbulb, Loader2 } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 interface Alert {
   severity: "high" | "medium" | "low";
@@ -31,6 +32,7 @@ const severityStyles: Record<Alert["severity"], string> = {
 
 const FarmInsights = ({ farmId }: Props) => {
   const { toast } = useToast();
+  const t = useT();
   const [loading, setLoading] = useState(false);
   const [insights, setInsights] = useState<Insights | null>(null);
   const [generatedAt, setGeneratedAt] = useState<Date | null>(null);
@@ -47,8 +49,8 @@ const FarmInsights = ({ farmId }: Props) => {
       setGeneratedAt(new Date());
     } catch (e: any) {
       toast({
-        title: "Couldn't generate insights",
-        description: e.message ?? "Please try again shortly.",
+        title: t("Couldn't generate insights"),
+        description: e.message ?? t("Please try again shortly."),
         variant: "destructive",
       });
     } finally {
@@ -73,10 +75,10 @@ const FarmInsights = ({ farmId }: Props) => {
 
   const liveMessage = loading
     ? insights
-      ? "Refreshing AI farm insights…"
-      : "Loading AI farm insights…"
+      ? t("Refreshing AI farm insights…")
+      : t("Loading AI farm insights…")
     : insights && generatedAt
-      ? `AI farm insights updated ${generatedAt.toLocaleTimeString()}.`
+      ? `${t("AI farm insights updated")} ${generatedAt.toLocaleTimeString()}.`
       : "";
 
   return (
@@ -121,7 +123,7 @@ const FarmInsights = ({ farmId }: Props) => {
               {/* Health Score */}
               <div className="rounded-xl border bg-card p-4 sm:p-5">
                 <div className="flex items-center justify-between mb-2 gap-2">
-                  <p className="text-sm font-medium text-muted-foreground">Farm Health Score</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t("Farm Health Score")}</p>
                   <span className={`text-3xl sm:text-4xl font-bold ${scoreColor}`}>
                     {score ?? "—"}
                     {score !== null && <span className="text-base text-muted-foreground">/100</span>}
@@ -134,7 +136,7 @@ const FarmInsights = ({ farmId }: Props) => {
               {/* Alerts */}
               <div>
                 <h4 className="text-sm font-semibold mb-2 flex items-center gap-1.5">
-                  <AlertTriangle className="w-4 h-4 text-accent-foreground" /> Alerts
+                  <AlertTriangle className="w-4 h-4 text-accent-foreground" /> {t("Alerts")}
                 </h4>
                 {insights.alerts?.length ? (
                   <div className="space-y-2">
@@ -155,7 +157,7 @@ const FarmInsights = ({ farmId }: Props) => {
                   </div>
                 ) : (
                   <div className="rounded-lg border bg-secondary/10 p-3 text-sm text-secondary flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4" /> No active alerts. Your farm is doing great!
+                    <CheckCircle2 className="w-4 h-4" /> {t("No active alerts. Your farm is doing great!")}
                   </div>
                 )}
               </div>
@@ -163,7 +165,7 @@ const FarmInsights = ({ farmId }: Props) => {
               {/* Recommendations */}
               <div>
                 <h4 className="text-sm font-semibold mb-2 flex items-center gap-1.5">
-                  <Lightbulb className="w-4 h-4 text-primary" /> Recommendations
+                  <Lightbulb className="w-4 h-4 text-primary" /> {t("Recommendations")}
                 </h4>
                 {insights.recommendations?.length ? (
                   <ul className="space-y-1.5">
@@ -175,19 +177,19 @@ const FarmInsights = ({ farmId }: Props) => {
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-sm text-muted-foreground">No specific recommendations right now.</p>
+                  <p className="text-sm text-muted-foreground">{t("No specific recommendations right now.")}</p>
                 )}
               </div>
 
               {generatedAt && (
                 <p className="text-[11px] text-muted-foreground text-right">
-                  Generated {generatedAt.toLocaleString()}
+                  {t("Generated")} {generatedAt.toLocaleString()}
                 </p>
               )}
             </>
           ) : (
             <div className="py-8 text-center text-sm text-muted-foreground">
-              No insights yet. Tap refresh to generate.
+              {t("No insights yet. Tap refresh to generate.")}
             </div>
           )}
         </CardContent>

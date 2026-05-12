@@ -15,6 +15,7 @@ import {
   type ConflictEntry,
 } from "@/lib/conflict-log";
 import { useToast } from "@/hooks/use-toast";
+import { useT } from "@/lib/i18n";
 
 interface SyncStatusPanelProps {
   /** Limit display to a single farm (e.g. on FarmView). Omit to show all farms the user can see. */
@@ -42,6 +43,7 @@ const formatRelative = (ts: number | null): string => {
 
 const SyncStatusPanel = ({ farmId }: SyncStatusPanelProps) => {
   const { toast } = useToast();
+  const t = useT();
   const [status, setStatus] = useState<SyncStatus | null>(null);
   const [farms, setFarms] = useState<FarmRow[]>([]);
   const [conflicts, setConflicts] = useState<ConflictEntry[]>([]);
@@ -94,11 +96,11 @@ const SyncStatusPanel = ({ farmId }: SyncStatusPanelProps) => {
     try {
       const r = await flushQueue();
       if (r.synced > 0) {
-        toast({ title: `Synced ${r.synced} log${r.synced === 1 ? "" : "s"}` });
+        toast({ title: `${t("Synced")} ${r.synced} ${r.synced === 1 ? t("log") : t("logs")}` });
       } else if (r.remaining > 0) {
-        toast({ title: "Still pending", description: `${r.remaining} log(s) couldn't sync yet.` });
+        toast({ title: t("Still pending"), description: `${r.remaining} ${t("log(s) couldn't sync yet.")}` });
       } else {
-        toast({ title: "All caught up", description: "Nothing to sync." });
+        toast({ title: t("All caught up"), description: t("Nothing to sync.") });
       }
     } finally {
       setSyncing(false);
@@ -112,12 +114,12 @@ const SyncStatusPanel = ({ farmId }: SyncStatusPanelProps) => {
   );
 
   const syncLive = syncing
-    ? "Syncing queued logs…"
+    ? t("Syncing queued logs…")
     : !online
-      ? "Offline. Changes will sync when reconnected."
+      ? t("Offline. Changes will sync when reconnected.")
       : totalPending > 0
-        ? `${totalPending} log${totalPending === 1 ? "" : "s"} pending sync.`
-        : "All farms synced.";
+        ? `${totalPending} ${totalPending === 1 ? t("log pending sync.") : t("logs pending sync.")}`
+        : t("All farms synced.");
 
   return (
     <Card className="border-border/50">
@@ -129,20 +131,20 @@ const SyncStatusPanel = ({ farmId }: SyncStatusPanelProps) => {
           <div className="min-w-0">
             <CardTitle className="text-lg flex items-center gap-2">
               <CloudUpload className="w-5 h-5 text-primary" />
-              Sync Status
+              {t("Sync Status")}
             </CardTitle>
             <CardDescription>
-              Queued worker logs and last successful sync per farm
+              {t("Queued worker logs and last successful sync per farm")}
             </CardDescription>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             {online ? (
               <Badge variant="outline" className="text-secondary border-secondary/30 bg-secondary/10">
-                <Wifi className="w-3 h-3 mr-1" /> Online
+                <Wifi className="w-3 h-3 mr-1" /> {t("Online")}
               </Badge>
             ) : (
               <Badge variant="outline" className="text-accent-foreground border-accent/40 bg-accent/15">
-                <WifiOff className="w-3 h-3 mr-1" /> Offline
+                <WifiOff className="w-3 h-3 mr-1" /> {t("Offline")}
               </Badge>
             )}
             <Button
@@ -150,14 +152,14 @@ const SyncStatusPanel = ({ farmId }: SyncStatusPanelProps) => {
               variant="outline"
               onClick={handleSync}
               disabled={!online || syncing}
-              title={!online ? "You're offline" : "Force a sync now"}
+              title={!online ? t("You're offline") : t("Force a sync now")}
             >
               {syncing ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <RefreshCw className="w-4 h-4" />
               )}
-              <span className="ml-1.5">Sync now</span>
+              <span className="ml-1.5">{t("Sync now")}</span>
             </Button>
           </div>
         </div>
@@ -168,14 +170,14 @@ const SyncStatusPanel = ({ farmId }: SyncStatusPanelProps) => {
             <div className="flex items-center justify-between gap-2 mb-2">
               <div className="flex items-center gap-2 text-sm font-semibold">
                 <AlertTriangle className="w-4 h-4 text-accent-foreground" />
-                Recent edit conflicts ({conflicts.length})
+                {t("Recent edit conflicts")} ({conflicts.length})
               </div>
               <Button
                 size="sm"
                 variant="ghost"
                 className="h-7 px-2"
                 onClick={() => clearConflicts()}
-                aria-label="Dismiss conflicts"
+                aria-label={t("Dismiss conflicts")}
               >
                 <X className="w-4 h-4" />
               </Button>
@@ -193,9 +195,9 @@ const SyncStatusPanel = ({ farmId }: SyncStatusPanelProps) => {
                     </span>
                     <Badge variant="outline" className="shrink-0 text-[10px]">
                       {c.resolution === "kept-mine"
-                        ? "Yours kept"
+                        ? t("Yours kept")
                         : c.resolution === "kept-theirs"
-                        ? "Server kept"
+                        ? t("Server kept")
                         : c.resolution}
                     </Badge>
                   </li>
@@ -204,7 +206,7 @@ const SyncStatusPanel = ({ farmId }: SyncStatusPanelProps) => {
           </div>
         )}
         {visibleFarms.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-4">No farms to display.</p>
+          <p className="text-sm text-muted-foreground text-center py-4">{t("No farms to display.")}</p>
         ) : (
           visibleFarms.map((farm) => {
             const pending = status?.pendingByFarm[farm.id] ?? 0;
@@ -217,17 +219,17 @@ const SyncStatusPanel = ({ farmId }: SyncStatusPanelProps) => {
                 <div className="min-w-0">
                   <p className="font-medium truncate">{farm.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    Last sync: <span className="font-medium text-foreground">{formatRelative(lastSync)}</span>
+                    {t("Last sync")}: <span className="font-medium text-foreground">{formatRelative(lastSync)}</span>
                   </p>
                 </div>
                 {pending > 0 ? (
                   <Badge className="bg-primary/15 text-primary hover:bg-primary/20 shrink-0">
                     <CloudUpload className="w-3 h-3 mr-1" />
-                    {pending} pending
+                    {pending} {t("pending")}
                   </Badge>
                 ) : (
                   <Badge variant="outline" className="text-secondary border-secondary/30 bg-secondary/10 shrink-0">
-                    <Check className="w-3 h-3 mr-1" /> Synced
+                    <Check className="w-3 h-3 mr-1" /> {t("Synced")}
                   </Badge>
                 )}
               </div>
