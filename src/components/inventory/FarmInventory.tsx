@@ -17,6 +17,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Package, Plus, AlertTriangle, ArrowDownToLine, ArrowUpFromLine } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
+import { useT } from "@/lib/i18n";
 
 type Item = Database["public"]["Tables"]["inventory_items"]["Row"];
 type Category = Database["public"]["Enums"]["inventory_category"];
@@ -38,6 +39,7 @@ interface Props {
 
 const FarmInventory = ({ farmId, userId, canManage }: Props) => {
   const { toast } = useToast();
+  const t = useT();
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -58,7 +60,7 @@ const FarmInventory = ({ farmId, userId, canManage }: Props) => {
         .order("name");
       if (!cancelled) {
         if (error) {
-          toast({ title: "Error loading inventory", description: error.message, variant: "destructive" });
+          toast({ title: t("Error loading inventory"), description: error.message, variant: "destructive" });
         } else {
           setItems(data || []);
         }
@@ -74,8 +76,8 @@ const FarmInventory = ({ farmId, userId, canManage }: Props) => {
   );
 
   const inventoryLive = loading
-    ? "Loading inventory items…"
-    : `Inventory updated. ${items.length} item${items.length === 1 ? "" : "s"} loaded${lowStock.length ? `, ${lowStock.length} low on stock` : ""}.`;
+    ? t("Loading inventory items…")
+    : `${t("Inventory updated.")} ${items.length} ${items.length === 1 ? t("item loaded") : t("items loaded")}${lowStock.length ? `, ${lowStock.length} ${t("low on stock")}` : ""}.`;
 
   return (
     <div className="space-y-6">
@@ -87,15 +89,15 @@ const FarmInventory = ({ farmId, userId, canManage }: Props) => {
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
               <CardTitle className="flex items-center gap-2 text-lg">
-                <Package className="w-5 h-5" /> Inventory
+                <Package className="w-5 h-5" /> {t("Inventory")}
               </CardTitle>
               <CardDescription>
-                Stock levels auto-update when workers log feed usage or vaccinations
+                {t("Stock levels auto-update when workers log feed usage or vaccinations")}
               </CardDescription>
             </div>
             {canManage && (
               <Button size="sm" onClick={() => setAddItemOpen(true)}>
-                <Plus className="w-4 h-4 mr-1" /> Add Item
+                <Plus className="w-4 h-4 mr-1" /> {t("Add Item")}
               </Button>
             )}
           </div>
@@ -105,7 +107,7 @@ const FarmInventory = ({ farmId, userId, canManage }: Props) => {
             <div className="mb-4 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 flex items-start gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
               <div className="text-sm">
-                <p className="font-semibold text-amber-700 dark:text-amber-400">Low stock alert</p>
+                <p className="font-semibold text-amber-700 dark:text-amber-400">{t("Low stock alert")}</p>
                 <p className="text-xs text-muted-foreground">
                   {lowStock.map((i) => i.name).join(", ")}
                 </p>
@@ -114,12 +116,12 @@ const FarmInventory = ({ farmId, userId, canManage }: Props) => {
           )}
 
           {loading ? (
-            <div className="py-8 text-center text-muted-foreground">Loading...</div>
+            <div className="py-8 text-center text-muted-foreground">{t("Loading...")}</div>
           ) : items.length === 0 ? (
             <div className="py-10 text-center text-muted-foreground">
               <Package className="w-10 h-10 mx-auto mb-2 opacity-50" />
-              <p>No inventory items yet.</p>
-              {canManage && <p className="text-xs mt-1">Click "Add Item" to start tracking your stock.</p>}
+              <p>{t("No inventory items yet.")}</p>
+              {canManage && <p className="text-xs mt-1">{t('Click "Add Item" to start tracking your stock.')}</p>}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -142,7 +144,7 @@ const FarmInventory = ({ farmId, userId, canManage }: Props) => {
                     </p>
                     {Number(item.low_stock_threshold) > 0 && (
                       <p className="text-xs text-muted-foreground mt-1">
-                        Low at {Number(item.low_stock_threshold).toLocaleString()} {item.unit}
+                        {t("Low at")} {Number(item.low_stock_threshold).toLocaleString()} {item.unit}
                       </p>
                     )}
                     {canManage && (
@@ -153,7 +155,7 @@ const FarmInventory = ({ farmId, userId, canManage }: Props) => {
                           className="flex-1 text-secondary border-secondary/40 hover:bg-secondary/10"
                           onClick={() => { setMoveItem(item); setMoveType("received"); }}
                         >
-                          <ArrowDownToLine className="w-3.5 h-3.5 mr-1" /> Receive
+                          <ArrowDownToLine className="w-3.5 h-3.5 mr-1" /> {t("Receive")}
                         </Button>
                         <Button
                           size="sm"
@@ -161,7 +163,7 @@ const FarmInventory = ({ farmId, userId, canManage }: Props) => {
                           className="flex-1"
                           onClick={() => { setMoveItem(item); setMoveType("used"); }}
                         >
-                          <ArrowUpFromLine className="w-3.5 h-3.5 mr-1" /> Use
+                          <ArrowUpFromLine className="w-3.5 h-3.5 mr-1" /> {t("Use")}
                         </Button>
                       </div>
                     )}
