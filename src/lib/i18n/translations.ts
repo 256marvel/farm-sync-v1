@@ -158,6 +158,29 @@ const sw: Dict = {
   "Upload Image": "Pakia Picha",
   "Change Image": "Badilisha Picha",
   "Remove Image": "Ondoa Picha",
+
+  // Offline sync
+  "Synced": "Imesinkronayizwa",
+  "Offline": "Nje ya Mtandao",
+  "Sync": "Sinkronayiza",
+  "Syncing": "Inasinkronayiza",
+  "log": "kiwandiiko",
+  "logs": "biwandiiko",
+  "Online & synced": "Mtandaoni na Imesinkronayizwa",
+  "You're offline. Logs will sync automatically when you reconnect.": "Uko nje ya mtandao. Viwandiiko vitasinkronayizwa kiotomatiki unaporudi mtandaoni.",
+  "Click to sync now": "Bonyeza kufanya sinkronayiza sasa",
+  "Synced %d log": "Kiwandiiko %d kimesinkronayizwa",
+  "Synced %d logs": "Biwandiiko %d vimesinkronayizwa",
+  "Queued reports were uploaded successfully.": "Ripoti zilizopangwa zimepakiwa.",
+  "%d queued log couldn't be saved": "Kiwandiiko %d kilichopangwa kikuwezi kuhifadhiwa",
+  "%d queued logs couldn't be saved": "Biwandiiko %d vilivyopangwa hakuwezi kuhifadhiwa",
+  "They were rejected by the server. Please re-enter them.": "Zilikataliwa na seva. Tafadhali ziingize tena.",
+  "Still pending": "Bado Zinasubiri",
+  "log(s) couldn't sync yet.": "kiwandiiko hakijasinkronayizwa.",
+
+  // NotFound
+  "Oops! Page not found": "Lo! Ukurasa haukuapatikana",
+  "Return to Home": "Rudi Nyumbani",
 };
 
 // Other Uganda languages: stubs (fall back to English). Add translations later.
@@ -444,42 +467,175 @@ const lg: Dict = {
   "Amount": "Omuwendo",
   "Breakdown by Category": "Okwawulamu okusinziira ku Kakatolika",
   "For the current filter selection": "Ku ebyo ebirondeddwa kati",
+
+  // Offline sync
+  "Sync": "Sinkronayiza",
+  "Syncing": "Tusinkronayiza",
+  "Online & synced": "Ku Yintaneeti era Bisinkroniziddwa",
+  "You're offline. Logs will sync automatically when you reconnect.": "Toli ku yintaneeti. Ebiwandiike binaasinkronayizibwa bw'oddamu ku yintaneeti.",
+  "Click to sync now": "Nyiga okusinkronayiza kati",
+  "Synced %d log": "Kiwandiike %d kisinkronayiziddwa",
+  "Synced %d logs": "Biwandiike %d bisinkronayiziddwa",
+  "Queued reports were uploaded successfully.": "Ebiwandiike bisinkronayiziddwa.",
+  "%d queued log couldn't be saved": "Kiwandiike %d tekisobola kuterekebwa",
+  "%d queued logs couldn't be saved": "Biwandiike %d tebisobola kuterekebwa",
+  "They were rejected by the server. Please re-enter them.": "Byanziridwa omu sava. Tukusaba okubwongerako.",
+
+  // NotFound
+  "Oops! Page not found": "Eeh! Omuko tegulabikanga",
+  "Return to Home": "Ddayo Awaka",
 };
 
 const nyn: Dict = {
+  // Branding & generic
+  "FarmSync": "FarmSync",
   "Sign In": "Taaha",
   "Sign Up": "Wewandiise",
   "Sign Out": "Ruga",
   "Cancel": "Reka",
   "Save": "Bika",
   "Language": "Orurimi",
+  "Loading...": "Kitarikujwar...",
+  "Error": "Enshobi",
+  "Back to Home": "Garuka aha nyumbu",
+  "Welcome back": "Tukusanyuse okugaruka",
+
+  // Offline sync
+  "Synced": "Yahangirwe",
+  "Offline": "Tahari kuruga omu interineti",
+  "Sync": "Hangira",
+  "Syncing": "Ni hangira",
+  "log": "ekihangire",
+  "logs": "ebihangire",
+  "Online & synced": "Nihu kuruga omu interineti kandi nihahangirwe",
+  "You're offline. Logs will sync automatically when you reconnect.": "Tahari kuruga omu interineti. Ebihangire nikija kuhangirwa hawebeire bworuga omu interineti.",
+  "Click to sync now": "Kandeeka okuhangira hati",
+  "Synced %d log": "Ekihangire %d kyahangirwe",
+  "Synced %d logs": "Ebihangire %d byahangirwe",
+  "Queued reports were uploaded successfully.": "Ebihangire byahangirwe.",
+  "%d queued log couldn't be saved": "Ekihangire %d tekisobora kubikwa",
+  "%d queued logs couldn't be saved": "Ebihangire %d tibisobora kubikwa",
+  "They were rejected by the server. Please re-enter them.": "Byanzwe omu sava. Yongera otwandika.",
+  "Still pending": "Nikirindirira",
+  "log(s) couldn't sync yet.": "ekihangire tekihangirwe.",
+
+  // NotFound
+  "Oops! Page not found": "Peege! Omurongo tiwine",
+  "Return to Home": "Garuka aha nyumbu",
 };
 
 const xog: Dict = {
+  // Branding & generic
+  "FarmSync": "FarmSync",
   "Sign In": "Yingira",
   "Sign Up": "Wewandiise",
   "Sign Out": "Fuluma",
   "Cancel": "Sazaamu",
   "Save": "Tereka",
   "Language": "Olulimi",
+  "Loading...": "Kitikka...",
+  "Error": "Kisoboka",
+  "Back to Home": "Ddayo Ewaka",
+  "Welcome back": "Tukusanyuse okudda",
+
+  // Offline sync
+  "Synced": "Bisinkronayizidwa",
+  "Offline": "Toli ku intaneti",
+  "Sync": "Sinkronayiza",
+  "Syncing": "Bisinkronayizibwa",
+  "log": "kiwandiiko",
+  "logs": "biwandiiko",
+  "Online & synced": "Oli ku intaneti era bisinkronayizidwa",
+  "You're offline. Logs will sync automatically when you reconnect.": "Toli ku intaneti. Ebiwandiiko binaasinkronayizibwa bw'oddamu ku intaneti.",
+  "Click to sync now": "Nyiiga okusinkronayiza kati",
+  "Synced %d log": "Kiwandiiko %d kisinkronayizidwe",
+  "Synced %d logs": "Biwandiiko %d bisinkronayizidwe",
+  "Queued reports were uploaded successfully.": "Ebiwandiiko bisinkronayizidwa.",
+  "%d queued log couldn't be saved": "Kiwandiiko %d tekisobola kuterekebwa",
+  "%d queued logs couldn't be saved": "Biwandiiko %d tebisobola kuterekebwa",
+  "They were rejected by the server. Please re-enter them.": "Byanziridwa omu sava. Tukusaba okubwongerako.",
+  "Still pending": "Bikyalindiridde",
+  "log(s) couldn't sync yet.": "kiwandiiko tekisinkronayizidwe.",
+
+  // NotFound
+  "Oops! Page not found": "Eeh! Omuko tegulangibwa",
+  "Return to Home": "Ddayo Ewaka",
 };
 
 const myx: Dict = {
+  // Branding & generic
+  "FarmSync": "FarmSync",
   "Sign In": "Injira",
   "Sign Up": "Yiyandikishe",
   "Sign Out": "Fuluma",
   "Cancel": "Lekha",
   "Save": "Bika",
   "Language": "Lulimi",
+  "Loading...": "Bikitikha...",
+  "Error": "Buli bubi",
+  "Back to Home": "Khubila Ewaka",
+  "Welcome back": "Tukusanyuse okubila",
+
+  // Offline sync
+  "Synced": "Bilubire",
+  "Offline": "Takhulakha bwa intaneti",
+  "Sync": "Lubila",
+  "Syncing": "Bilubile",
+  "log": "kiwandiiko",
+  "logs": "biwandiiko",
+  "Online & synced": "Akhulakha bwa intaneti era bilubire",
+  "You're offline. Logs will sync automatically when you reconnect.": "Takhulakha bwa intaneti. Ebiwandiiko bilubila okhwa khwelelo bw'wina khulakha.",
+  "Click to sync now": "Khuba okhulubila kwaleelo",
+  "Synced %d log": "Kiwandiiko %d kilubire",
+  "Synced %d logs": "Biwandiiko %d bilubire",
+  "Queued reports were uploaded successfully.": "Ebiwandiiko bilubire.",
+  "%d queued log couldn't be saved": "Kiwandiiko %d tekisobola khubikwa",
+  "%d queued logs couldn't be saved": "Biwandiiko %d tebisobola khubikwa",
+  "They were rejected by the server. Please re-enter them.": "Byanziridwa omu sava. Yiyandikishe nabi.",
+  "Still pending": "Bikhwelirira",
+  "log(s) couldn't sync yet.": "kiwandiiko tekilubile.",
+
+  // NotFound
+  "Oops! Page not found": "Aii! Intaneti yayo teyilangile",
+  "Return to Home": "Khubila Ewaka",
 };
 
 const luo: Dict = {
+  // Branding & generic
+  "FarmSync": "FarmSync",
   "Sign In": "Donji",
   "Sign Up": "Ndik nyingi",
   "Sign Out": "Wuog",
   "Cancel": "Wee",
   "Save": "Kan",
   "Language": "Dhok",
+  "Loading...": "Tii keto...",
+  "Error": "Mari",
+  "Back to Home": "Dok Dala",
+  "Welcome back": "Ber bedoni",
+
+  // Offline sync
+  "Synced": "Osinkronayiz",
+  "Offline": "Tik wi intanet",
+  "Sync": "Sinkronayiz",
+  "Syncing": "Sinkronayiz",
+  "log": "randik",
+  "logs": "randik",
+  "Online & synced": "Tii wi intanet kendo osinkronayiz",
+  "You're offline. Logs will sync automatically when you reconnect.": "Tik wi intanet. Randik nisinkronayre ka idok wi intanet.",
+  "Click to sync now": "Dii me sinkronayiz sani",
+  "Synced %d log": "Randik %d osinkronayiz",
+  "Synced %d logs": "Randik %d osinkronayiz",
+  "Queued reports were uploaded successfully.": "Randik osinkronayiz.",
+  "%d queued log couldn't be saved": "Randik %d okan",
+  "%d queued logs couldn't be saved": "Randik %d okan",
+  "They were rejected by the server. Please re-enter them.": "Osel kwer gi e server. Chaki ndik.",
+  "Still pending": "Otiend",
+  "log(s) couldn't sync yet.": "randik ok sinkronayiz.",
+
+  // NotFound
+  "Oops! Page not found": "Oops! Poti onge",
+  "Return to Home": "Dok Dala",
 };
 
 const en: Dict = {};
