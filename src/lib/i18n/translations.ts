@@ -158,6 +158,29 @@ const sw: Dict = {
   "Upload Image": "Pakia Picha",
   "Change Image": "Badilisha Picha",
   "Remove Image": "Ondoa Picha",
+
+  // Offline sync
+  "Synced": "Imesinkronayizwa",
+  "Offline": "Nje ya Mtandao",
+  "Sync": "Sinkronayiza",
+  "Syncing": "Inasinkronayiza",
+  "log": "kiwandiiko",
+  "logs": "biwandiiko",
+  "Online & synced": "Mtandaoni na Imesinkronayizwa",
+  "You're offline. Logs will sync automatically when you reconnect.": "Uko nje ya mtandao. Viwandiiko vitasinkronayizwa kiotomatiki unaporudi mtandaoni.",
+  "Click to sync now": "Bonyeza kufanya sinkronayiza sasa",
+  "Synced %d log": "Kiwandiiko %d kimesinkronayizwa",
+  "Synced %d logs": "Biwandiiko %d vimesinkronayizwa",
+  "Queued reports were uploaded successfully.": "Ripoti zilizopangwa zimepakiwa.",
+  "%d queued log couldn't be saved": "Kiwandiiko %d kilichopangwa kikuwezi kuhifadhiwa",
+  "%d queued logs couldn't be saved": "Biwandiiko %d vilivyopangwa hakuwezi kuhifadhiwa",
+  "They were rejected by the server. Please re-enter them.": "Zilikataliwa na seva. Tafadhali ziingize tena.",
+  "Still pending": "Bado Zinasubiri",
+  "log(s) couldn't sync yet.": "kiwandiiko hakijasinkronayizwa.",
+
+  // NotFound
+  "Oops! Page not found": "Lo! Ukurasa haukuapatikana",
+  "Return to Home": "Rudi Nyumbani",
 };
 
 // Other Uganda languages: stubs (fall back to English). Add translations later.
