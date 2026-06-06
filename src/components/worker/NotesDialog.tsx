@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { enqueueOrInsert } from "@/lib/offline-queue";
 import { Loader2 } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 interface NotesDialogProps {
   open: boolean;
@@ -18,6 +19,7 @@ interface NotesDialogProps {
 
 export const NotesDialog = ({ open, onOpenChange, workerId, farmId, onSuccess }: NotesDialogProps) => {
   const { toast } = useToast();
+  const t = useT();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -37,10 +39,10 @@ export const NotesDialog = ({ open, onOpenChange, workerId, farmId, onSuccess }:
       });
 
       toast({
-        title: queued ? "Saved offline" : "Success",
+        title: queued ? t("Saved offline") : t("Success"),
         description: queued
-          ? "You're offline. These notes will sync automatically when you reconnect."
-          : "Notes saved successfully",
+          ? t("You're offline. These notes will sync automatically when you reconnect.")
+          : t("Notes saved successfully"),
       });
 
       setFormData({
@@ -51,7 +53,7 @@ export const NotesDialog = ({ open, onOpenChange, workerId, farmId, onSuccess }:
       onOpenChange(false);
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: t("Error"),
         description: error.message,
         variant: "destructive",
       });
@@ -64,13 +66,13 @@ export const NotesDialog = ({ open, onOpenChange, workerId, farmId, onSuccess }:
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Add Notes</DialogTitle>
-          <DialogDescription>Record observations about flock health, feed quality, etc.</DialogDescription>
+          <DialogTitle>{t("Add Notes")}</DialogTitle>
+          <DialogDescription>{t("Record observations about flock health, feed quality, etc.")}</DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="date">Date *</Label>
+            <Label htmlFor="date">{t("Date")} *</Label>
             <Input
               id="date"
               type="date"
@@ -82,12 +84,12 @@ export const NotesDialog = ({ open, onOpenChange, workerId, farmId, onSuccess }:
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="notes">Notes *</Label>
+            <Label htmlFor="notes">{t("Notes")} *</Label>
             <Textarea
               id="notes"
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              placeholder="Enter your observations about the flock, feed quality, health concerns, etc..."
+              placeholder={t("Enter your observations about the flock, feed quality, health concerns, etc...")}
               required
               disabled={isLoading}
               rows={5}
@@ -101,11 +103,11 @@ export const NotesDialog = ({ open, onOpenChange, workerId, farmId, onSuccess }:
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              {t("Cancel")}
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Notes
+              {t("Save Notes")}
             </Button>
           </div>
         </form>

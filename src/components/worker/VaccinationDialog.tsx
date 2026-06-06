@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { enqueueOrInsert } from "@/lib/offline-queue";
 import { Loader2 } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 interface VaccinationDialogProps {
   open: boolean;
@@ -17,6 +18,7 @@ interface VaccinationDialogProps {
 
 export const VaccinationDialog = ({ open, onOpenChange, workerId, farmId, onSuccess }: VaccinationDialogProps) => {
   const { toast } = useToast();
+  const t = useT();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -40,10 +42,10 @@ export const VaccinationDialog = ({ open, onOpenChange, workerId, farmId, onSucc
       });
 
       toast({
-        title: queued ? "Saved offline" : "Success",
+        title: queued ? t("Saved offline") : t("Success"),
         description: queued
-          ? "You're offline. This vaccination report will sync automatically when you reconnect."
-          : "Vaccination data recorded successfully",
+          ? t("You're offline. This vaccination report will sync automatically when you reconnect.")
+          : t("Vaccination data recorded successfully"),
       });
 
       setFormData({
@@ -56,7 +58,7 @@ export const VaccinationDialog = ({ open, onOpenChange, workerId, farmId, onSucc
       onOpenChange(false);
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: t("Error"),
         description: error.message,
         variant: "destructive",
       });
@@ -69,13 +71,13 @@ export const VaccinationDialog = ({ open, onOpenChange, workerId, farmId, onSucc
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Record Vaccination</DialogTitle>
-          <DialogDescription>Enter vaccination details</DialogDescription>
+          <DialogTitle>{t("Record Vaccination")}</DialogTitle>
+          <DialogDescription>{t("Enter vaccination details")}</DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="date">Date *</Label>
+            <Label htmlFor="date">{t("Date")} *</Label>
             <Input
               id="date"
               type="date"
@@ -87,13 +89,13 @@ export const VaccinationDialog = ({ open, onOpenChange, workerId, farmId, onSucc
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="vaccine_name">Vaccine Name *</Label>
+            <Label htmlFor="vaccine_name">{t("Vaccine Name")} *</Label>
             <Input
               id="vaccine_name"
               type="text"
               value={formData.vaccine_name}
               onChange={(e) => setFormData({ ...formData, vaccine_name: e.target.value })}
-              placeholder="e.g., Newcastle Disease Vaccine"
+              placeholder={t("e.g., Newcastle Disease Vaccine")}
               required
               disabled={isLoading}
             />
@@ -101,7 +103,7 @@ export const VaccinationDialog = ({ open, onOpenChange, workerId, farmId, onSucc
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="birds_vaccinated">Birds Vaccinated *</Label>
+              <Label htmlFor="birds_vaccinated">{t("Birds Vaccinated")} *</Label>
               <Input
                 id="birds_vaccinated"
                 type="number"
@@ -114,13 +116,13 @@ export const VaccinationDialog = ({ open, onOpenChange, workerId, farmId, onSucc
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="administered_by">Administered By *</Label>
+              <Label htmlFor="administered_by">{t("Administered By")} *</Label>
               <Input
                 id="administered_by"
                 type="text"
                 value={formData.administered_by}
                 onChange={(e) => setFormData({ ...formData, administered_by: e.target.value })}
-                placeholder="Name of person"
+                placeholder={t("Name of person")}
                 required
                 disabled={isLoading}
               />
@@ -134,11 +136,11 @@ export const VaccinationDialog = ({ open, onOpenChange, workerId, farmId, onSucc
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              {t("Cancel")}
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Record
+              {t("Save Record")}
             </Button>
           </div>
         </form>
