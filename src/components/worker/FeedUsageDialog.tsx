@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { enqueueOrInsert } from "@/lib/offline-queue";
 import { Loader2 } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 interface FeedUsageDialogProps {
   open: boolean;
@@ -18,6 +19,7 @@ interface FeedUsageDialogProps {
 
 export const FeedUsageDialog = ({ open, onOpenChange, workerId, farmId, onSuccess }: FeedUsageDialogProps) => {
   const { toast } = useToast();
+  const t = useT();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -41,10 +43,10 @@ export const FeedUsageDialog = ({ open, onOpenChange, workerId, farmId, onSucces
       });
 
       toast({
-        title: queued ? "Saved offline" : "Success",
+        title: queued ? t("Saved offline") : t("Success"),
         description: queued
-          ? "You're offline. This feed usage will sync automatically when you reconnect."
-          : "Feed usage data recorded successfully",
+          ? t("You're offline. This feed usage will sync automatically when you reconnect.")
+          : t("Feed usage data recorded successfully"),
       });
 
       setFormData({
@@ -57,7 +59,7 @@ export const FeedUsageDialog = ({ open, onOpenChange, workerId, farmId, onSucces
       onOpenChange(false);
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: t("Error"),
         description: error.message,
         variant: "destructive",
       });
@@ -70,13 +72,13 @@ export const FeedUsageDialog = ({ open, onOpenChange, workerId, farmId, onSucces
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Record Feed Usage</DialogTitle>
-          <DialogDescription>Enter today's feed consumption data</DialogDescription>
+          <DialogTitle>{t("Record Feed Usage")}</DialogTitle>
+          <DialogDescription>{t("Enter today's feed consumption data")}</DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="date">Date *</Label>
+            <Label htmlFor="date">{t("Date")} *</Label>
             <Input
               id="date"
               type="date"
@@ -88,28 +90,28 @@ export const FeedUsageDialog = ({ open, onOpenChange, workerId, farmId, onSucces
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="feed_type">Feed Type *</Label>
+            <Label htmlFor="feed_type">{t("Feed Type")} *</Label>
             <Select
               value={formData.feed_type}
               onValueChange={(value) => setFormData({ ...formData, feed_type: value })}
               disabled={isLoading}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select feed type" />
+                <SelectValue placeholder={t("Select feed type")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Starter Feed">Starter Feed</SelectItem>
-                <SelectItem value="Grower Feed">Grower Feed</SelectItem>
-                <SelectItem value="Layer Feed">Layer Feed</SelectItem>
-                <SelectItem value="Broiler Feed">Broiler Feed</SelectItem>
-                <SelectItem value="Finisher Feed">Finisher Feed</SelectItem>
+                <SelectItem value="Starter Feed">{t("Starter Feed")}</SelectItem>
+                <SelectItem value="Grower Feed">{t("Grower Feed")}</SelectItem>
+                <SelectItem value="Layer Feed">{t("Layer Feed")}</SelectItem>
+                <SelectItem value="Broiler Feed">{t("Broiler Feed")}</SelectItem>
+                <SelectItem value="Finisher Feed">{t("Finisher Feed")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="quantity_used_kg">Quantity Used (kg) *</Label>
+              <Label htmlFor="quantity_used_kg">{t("Quantity Used (kg)")} *</Label>
               <Input
                 id="quantity_used_kg"
                 type="number"
@@ -123,7 +125,7 @@ export const FeedUsageDialog = ({ open, onOpenChange, workerId, farmId, onSucces
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="remaining_stock_kg">Remaining Stock (kg) *</Label>
+              <Label htmlFor="remaining_stock_kg">{t("Remaining Stock (kg)")} *</Label>
               <Input
                 id="remaining_stock_kg"
                 type="number"
@@ -144,11 +146,11 @@ export const FeedUsageDialog = ({ open, onOpenChange, workerId, farmId, onSucces
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              {t("Cancel")}
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Record
+              {t("Save Record")}
             </Button>
           </div>
         </form>

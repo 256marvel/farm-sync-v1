@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { enqueueOrInsert } from "@/lib/offline-queue";
 import { Loader2 } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 interface EggProductionDialogProps {
   open: boolean;
@@ -17,6 +18,7 @@ interface EggProductionDialogProps {
 
 export const EggProductionDialog = ({ open, onOpenChange, workerId, farmId, onSuccess }: EggProductionDialogProps) => {
   const { toast } = useToast();
+  const t = useT();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -42,10 +44,10 @@ export const EggProductionDialog = ({ open, onOpenChange, workerId, farmId, onSu
       });
 
       toast({
-        title: queued ? "Saved offline" : "Success",
+        title: queued ? t("Saved offline") : t("Success"),
         description: queued
-          ? "You're offline. This egg report will sync automatically when you reconnect."
-          : "Egg production data recorded successfully",
+          ? t("You're offline. This egg report will sync automatically when you reconnect.")
+          : t("Egg production data recorded successfully"),
       });
 
       setFormData({
@@ -59,7 +61,7 @@ export const EggProductionDialog = ({ open, onOpenChange, workerId, farmId, onSu
       onOpenChange(false);
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: t("Error"),
         description: error.message,
         variant: "destructive",
       });
@@ -72,13 +74,13 @@ export const EggProductionDialog = ({ open, onOpenChange, workerId, farmId, onSu
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Record Egg Production</DialogTitle>
-          <DialogDescription>Enter today's egg collection data</DialogDescription>
+          <DialogTitle>{t("Record Egg Production")}</DialogTitle>
+          <DialogDescription>{t("Enter today's egg collection data")}</DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="date">Date *</Label>
+            <Label htmlFor="date">{t("Date")} *</Label>
             <Input
               id="date"
               type="date"
@@ -91,7 +93,7 @@ export const EggProductionDialog = ({ open, onOpenChange, workerId, farmId, onSu
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="trays_collected">Trays Collected *</Label>
+              <Label htmlFor="trays_collected">{t("Trays Collected")} *</Label>
               <Input
                 id="trays_collected"
                 type="number"
@@ -104,7 +106,7 @@ export const EggProductionDialog = ({ open, onOpenChange, workerId, farmId, onSu
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="eggs_per_tray">Eggs Per Tray *</Label>
+              <Label htmlFor="eggs_per_tray">{t("Eggs Per Tray")} *</Label>
               <Input
                 id="eggs_per_tray"
                 type="number"
@@ -119,7 +121,7 @@ export const EggProductionDialog = ({ open, onOpenChange, workerId, farmId, onSu
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="damaged_trays">Damaged Trays</Label>
+              <Label htmlFor="damaged_trays">{t("Damaged Trays")}</Label>
               <Input
                 id="damaged_trays"
                 type="number"
@@ -131,7 +133,7 @@ export const EggProductionDialog = ({ open, onOpenChange, workerId, farmId, onSu
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="damaged_eggs">Damaged Eggs</Label>
+              <Label htmlFor="damaged_eggs">{t("Damaged Eggs")}</Label>
               <Input
                 id="damaged_eggs"
                 type="number"
@@ -150,11 +152,11 @@ export const EggProductionDialog = ({ open, onOpenChange, workerId, farmId, onSu
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              {t("Cancel")}
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Record
+              {t("Save Record")}
             </Button>
           </div>
         </form>

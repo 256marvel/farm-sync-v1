@@ -26,6 +26,7 @@ import { NotesDialog } from "./worker/NotesDialog";
 import WorkerMonthlyRecords from "./worker/WorkerMonthlyRecords";
 import SyncStatusPanel from "./SyncStatusPanel";
 import { formatRole, formatUGX } from "@/lib/format";
+import { useT } from "@/lib/i18n";
 
 type Worker = Database["public"]["Tables"]["workers"]["Row"];
 type Farm = Database["public"]["Tables"]["farms"]["Row"];
@@ -36,6 +37,7 @@ interface WorkerDashboardProps {
 
 const WorkerDashboard = ({ userId }: WorkerDashboardProps) => {
   const { toast } = useToast();
+  const t = useT();
   const [worker, setWorker] = useState<Worker | null>(null);
   const [farm, setFarm] = useState<Farm | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -71,7 +73,7 @@ const WorkerDashboard = ({ userId }: WorkerDashboardProps) => {
       setFarm(farmData);
     } catch (error: any) {
       toast({
-        title: "Error loading data",
+        title: t("Error loading data"),
         description: error.message,
         variant: "destructive",
       });
@@ -83,8 +85,8 @@ const WorkerDashboard = ({ userId }: WorkerDashboardProps) => {
   const handleDataEntrySuccess = () => {
     setRefreshKey((prev) => prev + 1);
     toast({
-      title: "Data recorded",
-      description: "Your entry has been saved successfully",
+      title: t("Data recorded"),
+      description: t("Your entry has been saved successfully"),
     });
   };
 
@@ -99,7 +101,7 @@ const WorkerDashboard = ({ userId }: WorkerDashboardProps) => {
   if (!worker || !farm) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">Unable to load worker information</p>
+        <p className="text-muted-foreground">{t("Unable to load worker information")}</p>
       </div>
     );
   }
@@ -111,7 +113,7 @@ const WorkerDashboard = ({ userId }: WorkerDashboardProps) => {
         <div className="flex items-start justify-between flex-wrap gap-3 sm:gap-4">
           <div className="min-w-0">
             <h2 className="text-2xl sm:text-3xl font-bold mb-1">
-              Welcome, {worker.full_name.split(" ")[0]} 👋
+              {t("Welcome")}, {worker.full_name.split(" ")[0]} 👋
             </h2>
             <p className="text-sm sm:text-base text-muted-foreground">{farm.name} · {farm.location_district}</p>
             <div className="flex items-center gap-2 mt-3 flex-wrap">
@@ -128,7 +130,7 @@ const WorkerDashboard = ({ userId }: WorkerDashboardProps) => {
           {worker.monthly_salary != null && (
             <div className="text-left sm:text-right w-full sm:w-auto">
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground sm:justify-end">
-                <Wallet className="w-3.5 h-3.5" /> My Monthly Salary
+                <Wallet className="w-3.5 h-3.5" /> {t("My Monthly Salary")}
               </div>
               <p className="text-xl sm:text-2xl font-bold text-primary">{formatUGX(Number(worker.monthly_salary))}</p>
             </div>
@@ -139,16 +141,16 @@ const WorkerDashboard = ({ userId }: WorkerDashboardProps) => {
       {/* Quick Actions */}
       <Card>
         <CardHeader>
-          <CardTitle>Record Today's Work</CardTitle>
-          <CardDescription>Log your daily farm operations</CardDescription>
+          <CardTitle>{t("Record Today's Work")}</CardTitle>
+          <CardDescription>{t("Log your daily farm operations")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3">
-            <ActionButton icon={Egg} label="Egg Production" onClick={() => setEggDialogOpen(true)} />
-            <ActionButton icon={Package} label="Feed Usage" onClick={() => setFeedDialogOpen(true)} />
-            <ActionButton icon={AlertTriangle} label="Mortality" onClick={() => setMortalityDialogOpen(true)} />
-            <ActionButton icon={Syringe} label="Vaccination" onClick={() => setVaccinationDialogOpen(true)} />
-            <ActionButton icon={FileText} label="Notes" onClick={() => setNotesDialogOpen(true)} />
+            <ActionButton icon={Egg} label={t("Egg Production")} onClick={() => setEggDialogOpen(true)} />
+            <ActionButton icon={Package} label={t("Feed Usage")} onClick={() => setFeedDialogOpen(true)} />
+            <ActionButton icon={AlertTriangle} label={t("Mortality")} onClick={() => setMortalityDialogOpen(true)} />
+            <ActionButton icon={Syringe} label={t("Vaccination")} onClick={() => setVaccinationDialogOpen(true)} />
+            <ActionButton icon={FileText} label={t("Notes")} onClick={() => setNotesDialogOpen(true)} />
           </div>
         </CardContent>
       </Card>
@@ -164,20 +166,20 @@ const WorkerDashboard = ({ userId }: WorkerDashboardProps) => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <User className="w-5 h-5" /> My Profile
+              <User className="w-5 h-5" /> {t("My Profile")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
-            <Field label="Full Name" value={worker.full_name} />
-            <Field label="Login Email" value={worker.auto_generated_username} mono />
+            <Field label={t("Full Name")} value={worker.full_name} />
+            <Field label={t("Login Email")} value={worker.auto_generated_username} mono />
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Age" value={`${worker.age} yrs`} />
-              <Field label="Gender" value={worker.gender} capitalize />
+              <Field label={t("Age")} value={`${worker.age} ${t("yrs")}`} />
+              <Field label={t("Gender")} value={worker.gender} capitalize />
             </div>
-            {worker.contact_phone && <Field label="Phone" value={worker.contact_phone} />}
-            {worker.contact_address && <Field label="Address" value={worker.contact_address} />}
+            {worker.contact_phone && <Field label={t("Phone")} value={worker.contact_phone} />}
+            {worker.contact_address && <Field label={t("Address")} value={worker.contact_address} />}
             <div className="pt-3 border-t">
-              <p className="text-xs text-muted-foreground mb-2">Next of Kin</p>
+              <p className="text-xs text-muted-foreground mb-2">{t("Next of Kin")}</p>
               <p className="font-medium">{worker.next_of_kin_name}</p>
               <p className="text-xs text-muted-foreground capitalize">
                 {worker.next_of_kin_relationship} · {worker.next_of_kin_phone}
@@ -189,20 +191,20 @@ const WorkerDashboard = ({ userId }: WorkerDashboardProps) => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <MapPin className="w-5 h-5" /> Farm
+              <MapPin className="w-5 h-5" /> {t("Farm")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div>
-              <p className="text-xs text-muted-foreground">Name</p>
+              <p className="text-xs text-muted-foreground">{t("Name")}</p>
               <p className="text-lg font-bold">{farm.name}</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Type" value={farm.farm_type.replace("_", " ")} capitalize />
-              <Field label="District" value={farm.location_district} />
+              <Field label={t("Type")} value={farm.farm_type.replace("_", " ")} capitalize />
+              <Field label={t("District")} value={farm.location_district} />
             </div>
-            {farm.bird_capacity && <Field label="Bird Capacity" value={farm.bird_capacity.toLocaleString()} />}
-            {farm.description && <Field label="About" value={farm.description} />}
+            {farm.bird_capacity && <Field label={t("Bird Capacity")} value={farm.bird_capacity.toLocaleString()} />}
+            {farm.description && <Field label={t("About")} value={farm.description} />}
           </CardContent>
         </Card>
       </div>

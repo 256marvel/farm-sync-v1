@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { enqueueOrInsert } from "@/lib/offline-queue";
 import { Loader2 } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 interface MortalityDialogProps {
   open: boolean;
@@ -18,6 +19,7 @@ interface MortalityDialogProps {
 
 export const MortalityDialog = ({ open, onOpenChange, workerId, farmId, onSuccess }: MortalityDialogProps) => {
   const { toast } = useToast();
+  const t = useT();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -41,10 +43,10 @@ export const MortalityDialog = ({ open, onOpenChange, workerId, farmId, onSucces
       });
 
       toast({
-        title: queued ? "Saved offline" : "Success",
+        title: queued ? t("Saved offline") : t("Success"),
         description: queued
-          ? "You're offline. This mortality report will sync automatically when you reconnect."
-          : "Mortality data recorded successfully",
+          ? t("You're offline. This mortality report will sync automatically when you reconnect.")
+          : t("Mortality data recorded successfully"),
       });
 
       setFormData({
@@ -57,7 +59,7 @@ export const MortalityDialog = ({ open, onOpenChange, workerId, farmId, onSucces
       onOpenChange(false);
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: t("Error"),
         description: error.message,
         variant: "destructive",
       });
@@ -70,13 +72,13 @@ export const MortalityDialog = ({ open, onOpenChange, workerId, farmId, onSucces
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Record Mortality</DialogTitle>
-          <DialogDescription>Enter mortality data for today</DialogDescription>
+          <DialogTitle>{t("Record Mortality")}</DialogTitle>
+          <DialogDescription>{t("Enter mortality data for today")}</DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="date">Date *</Label>
+            <Label htmlFor="date">{t("Date")} *</Label>
             <Input
               id="date"
               type="date"
@@ -89,7 +91,7 @@ export const MortalityDialog = ({ open, onOpenChange, workerId, farmId, onSucces
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="number_dead">Number of Birds Dead *</Label>
+              <Label htmlFor="number_dead">{t("Number of Birds Dead")} *</Label>
               <Input
                 id="number_dead"
                 type="number"
@@ -102,7 +104,7 @@ export const MortalityDialog = ({ open, onOpenChange, workerId, farmId, onSucces
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="age_weeks">Age (Weeks) *</Label>
+              <Label htmlFor="age_weeks">{t("Age (Weeks)")} *</Label>
               <Input
                 id="age_weeks"
                 type="number"
@@ -116,12 +118,12 @@ export const MortalityDialog = ({ open, onOpenChange, workerId, farmId, onSucces
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="suspected_cause">Suspected Cause *</Label>
+            <Label htmlFor="suspected_cause">{t("Suspected Cause")} *</Label>
             <Textarea
               id="suspected_cause"
               value={formData.suspected_cause}
               onChange={(e) => setFormData({ ...formData, suspected_cause: e.target.value })}
-              placeholder="Describe the suspected cause of death..."
+              placeholder={t("Describe the suspected cause of death...")}
               required
               disabled={isLoading}
               rows={3}
@@ -135,11 +137,11 @@ export const MortalityDialog = ({ open, onOpenChange, workerId, farmId, onSucces
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              {t("Cancel")}
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Record
+              {t("Save Record")}
             </Button>
           </div>
         </form>
